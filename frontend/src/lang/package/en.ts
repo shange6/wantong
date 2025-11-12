@@ -1,6 +1,6 @@
 export default {
   // Common section
-  module_common: {
+  common: {
     confirm: "Confirm",
     cancel: "Cancel",
     reset: "Reset",

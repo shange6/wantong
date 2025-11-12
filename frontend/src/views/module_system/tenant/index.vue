@@ -164,11 +164,11 @@
         <el-table-column v-if="tableColumns.find((col) => col.prop === 'description')?.show" label="描述" prop="description" min-width="140" />
         <el-table-column v-if="tableColumns.find((col) => col.prop === 'created_at')?.show" label="创建时间" prop="created_at" min-width="180" />
         <el-table-column v-if="tableColumns.find((col) => col.prop === 'updated_at')?.show" label="更新时间" prop="updated_at" min-width="180" />
-        <el-table-column v-if="tableColumns.find((col) => col.prop === 'creator')?.show" label="创建人" prop="creator" min-width="120">
+        <!-- <el-table-column v-if="tableColumns.find((col) => col.prop === 'creator')?.show" label="创建人" prop="creator" min-width="120">
           <template #default="scope">
             <el-tag>{{ scope.row.creator?.name }}</el-tag>
           </template>
-        </el-table-column>
+        </el-table-column> -->
         <el-table-column v-if="tableColumns.find(col => col.prop === 'operation')?.show" fixed="right" label="操作" align="center" min-width="180">
           <template #default="scope">
             <el-button v-hasPerm="['module_generator:tenant:detail']" type="info" size="small" link icon="document" @click="handleOpenDialog('detail', scope.row.id)">详情</el-button>

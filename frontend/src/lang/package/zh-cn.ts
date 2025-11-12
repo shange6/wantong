@@ -1,6 +1,6 @@
 export default {
   // 公共部分
-  module_common: {
+  common: {
     confirm: "确定",
     cancel: "取消",
     reset: "重置",
