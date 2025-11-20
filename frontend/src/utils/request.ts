@@ -68,6 +68,24 @@ httpRequest.interceptors.response.use(
     return response;
   },
   async (error: AxiosError<ApiResponse>) => {
+    // 处理网络错误（连接拒绝、超时等）
+    if (!error.response) {
+      let errorMessage = "网络连接异常";
+      
+      // 根据错误类型提供更友好的提示
+      if (error.message?.includes('ECONNREFUSED')) {
+        errorMessage = "服务器连接失败，请检查后端服务是否正常运行";
+      } else if (error.message?.includes('timeout')) {
+        errorMessage = "请求超时，请稍后重试";
+      } else if (error.message?.includes('Network Error')) {
+        errorMessage = "网络连接错误，请检查您的网络设置";
+      }
+      
+      console.error("网络请求失败:", error);
+      ElMessage.error(errorMessage);
+      return Promise.reject(new Error(errorMessage));
+    }
+
     const data = error.response?.data;
 
     // 处理blob类型的错误响应
@@ -87,8 +105,8 @@ httpRequest.interceptors.response.use(
       } catch (e) {
         console.error("请求异常:", e);
         // 如果无法解析为JSON，则使用默认错误处理
-        ElMessage.error(error.message || "请求异常");
-        return Promise.reject(new Error(error.message || "请求异常"));
+        ElMessage.error("数据解析失败");
+        return Promise.reject(new Error("数据解析失败"));
       }
     }
 
@@ -105,8 +123,8 @@ httpRequest.interceptors.response.use(
       ElMessage.error(data.msg || "服务异常");
       return Promise.reject(new Error(data.msg || "服务异常"));
     } else {
-      ElMessage.error(error.message || "请求异常");
-      return Promise.reject(new Error(error.message || "请求异常"));
+      ElMessage.error("请求处理失败，请稍后重试");
+      return Promise.reject(new Error("请求处理失败"));
     }
   }
 );

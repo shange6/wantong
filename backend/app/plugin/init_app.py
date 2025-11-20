@@ -68,7 +68,6 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[Any, Any]:
             redis_ready=True,
             scheduler_jobs=scheduler_jobs_count,
             scheduler_status=scheduler_status,
-            show_banner=True
         )
         
     except Exception as e:
@@ -127,7 +126,7 @@ def register_routers(app: FastAPI) -> None:
     返回:
     - None
     """
-    app.include_router(router=router, dependencies=[Depends(RateLimiter(times=2, seconds=5))])
+    app.include_router(router=router, dependencies=[Depends(RateLimiter(times=5, seconds=10))])
 
 def register_files(app: FastAPI) -> None:
     """

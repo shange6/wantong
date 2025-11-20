@@ -97,6 +97,9 @@ class TenantService:
         obj = await TenantCRUD(auth).get(name=data.name)
         if obj:
             raise CustomException(msg='创建失败，名称已存在')
+        obj = await TenantCRUD(auth).get(code=data.code)
+        if obj:
+            raise CustomException(msg='创建失败，编码已存在')
         obj = await TenantCRUD(auth).create_crud(data=data)
         return TenantOutSchema.model_validate(obj).model_dump()
     

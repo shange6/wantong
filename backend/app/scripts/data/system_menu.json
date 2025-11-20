@@ -797,7 +797,7 @@
         "type": 2,
         "icon": "el-icon-Aim",
         "order": 6,
-        "permission": ":query",
+        "permission": "module_system:log:query",
         "route_name": "Log",
         "route_path": "/system/log",
         "component_path": "module_system/log/index",

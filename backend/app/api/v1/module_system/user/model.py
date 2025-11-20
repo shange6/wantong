@@ -78,7 +78,7 @@ class UserModel(MappedBase):
     status: Mapped[bool] = mapped_column(Boolean(), default=True, nullable=False, comment="是否启用(True:启用 False:禁用)")
     mobile: Mapped[Optional[str]] = mapped_column(String(20),nullable=True,unique=True,comment="手机号")
     email: Mapped[Optional[str]] = mapped_column(String(64),nullable=True,unique=True,comment="邮箱")
-    gender: Mapped[Optional[str]] = mapped_column(String(1), default='0',nullable=True,comment="性别(0:男 1:女 2:未知)")
+    gender: Mapped[Optional[str]] = mapped_column(String(1), default='2',nullable=True,comment="性别(0:男 1:女 2:未知)")
     avatar: Mapped[Optional[str]] = mapped_column(String(500),nullable=True,comment="头像URL地址")
     is_superuser: Mapped[bool] = mapped_column(Boolean,default=False,nullable=False,comment="是否超管")
     last_login: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True),nullable=True,comment="最后登录时间")

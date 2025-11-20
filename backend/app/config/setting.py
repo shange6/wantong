@@ -48,7 +48,11 @@ class Settings(BaseSettings):
     # ******************** 跨域配置 ******************** #
     # ================================================= #
     CORS_ORIGIN_ENABLE: bool = True    # 是否启用跨域
-    ALLOW_ORIGINS: List[str] = ["*"]   # 允许的域名列表
+    # ALLOW_ORIGINS: List[str] = ["*"]   # 允许的域名列表
+    ALLOW_ORIGINS: List[str] = [
+        'http://127.0.0.1:8001',
+        'http://localhost:5180',
+    ]   # 允许的域名列表
     ALLOW_METHODS: List[str] = ["*"]   # 允许的HTTP方法
     ALLOW_HEADERS: List[str] = ["*"]   # 允许的请求头
     ALLOW_CREDENTIALS: bool = True     # 是否允许携带cookie
@@ -140,14 +144,7 @@ class Settings(BaseSettings):
     UPLOAD_FILE_PATH: Path = Path('static/upload')    # 上传目录
     UPLOAD_MACHINE: str = 'A'                         # 上传机器标识
     ALLOWED_EXTENSIONS: list[str] = [                 # 允许的文件类型
-        # 图片
-        '.bmp', '.gif', '.jpg', '.jpeg', '.png', '.ico', '.svg',
-        # 文档
-        '.csv', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.html', '.htm', '.txt', '.pdf',
-        # 压缩包
-        '.rar', '.zip', '.gz', '.bz2',
-        # 视频
-        '.mp4', '.avi', '.rmvb'
+        '.gif', '.jpg', '.jpeg', '.png', '.ico', '.svg', '.xls', '.xlsx'
     ]
     MAX_FILE_SIZE: int = 10 * 1024 * 1024  # 最大文件大小(10MB)
 

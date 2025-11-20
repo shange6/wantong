@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from enum import Enum
+from typing import Protocol
 
 from app.config.setting import settings
 
@@ -706,5 +707,20 @@ class GenConstant:
     )
 
 
+class TypedContextProtocol(Protocol):
+    perf_time: float
+
+    ip: str
+    country: str | None
+    region: str | None
+    city: str | None
+
+    user_agent: str
+    os: str | None
+    browser: str | None
+    device: str | None
+
+    permission: str | None
+    
 # if __name__ == "__main__":
 #     print(RET.OK.msg)  # 输出: 成功

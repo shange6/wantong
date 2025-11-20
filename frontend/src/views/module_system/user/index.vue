@@ -229,6 +229,11 @@
                 </el-tag>
               </template>
             </el-table-column>
+            <el-table-column label="部门" prop="dept" min-width="100">
+              <template #default="scope">
+                {{ scope.row.dept ? scope.row.dept.name : "" }}
+              </template>
+            </el-table-column>
             <el-table-column label="性别" prop="gender" min-width="100">
               <template #default="scope">
                 <el-tag v-if="scope.row.gender === '0'" type="success">男</el-tag>
@@ -651,7 +656,7 @@ const rules = reactive({
   username: [{ required: true, message: "请输入账号", trigger: "blur" }],
   name: [{ required: true, message: "请输入用户名", trigger: "blur" }],
   password: [{ required: true, message: "请输入密码", trigger: "blur" }],
-  gender: [{ required: true, message: "请选择性别", trigger: "blur" }],
+  gender: [{ required: false, message: "请选择性别", trigger: "blur" }],
   email: [
     {
       pattern: /\w[-\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\.)+[A-Za-z]{2,14}/,

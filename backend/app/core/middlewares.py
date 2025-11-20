@@ -20,14 +20,14 @@ from app.api.v1.module_system.params.service import ParamsService
 class CustomCORSMiddleware(CORSMiddleware):
     """CORS跨域中间件"""
     def __init__(self, app: ASGIApp) -> None:
-        CORSMiddlewareConfig: dict[str, Any]    = {
-            "allow_origins": settings.ALLOW_ORIGINS,
-            "allow_methods": settings.ALLOW_METHODS,
-            "allow_headers": settings.ALLOW_HEADERS,
-            "allow_credentials": settings.ALLOW_CREDENTIALS,
-            "expose_headers": settings.CORS_EXPOSE_HEADERS,
-        }
-        super().__init__(app, **CORSMiddlewareConfig)
+        super().__init__(
+            app,
+            allow_origins=settings.ALLOW_ORIGINS,
+            allow_methods=settings.ALLOW_METHODS,
+            allow_headers=settings.ALLOW_HEADERS,
+            allow_credentials=settings.ALLOW_CREDENTIALS,
+            expose_headers=settings.CORS_EXPOSE_HEADERS,
+        )
 
 
 class RequestLogMiddleware(BaseHTTPMiddleware):

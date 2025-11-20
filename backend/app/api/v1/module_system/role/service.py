@@ -66,6 +66,9 @@ class RoleService:
         role = await RoleCRUD(auth).get(name=data.name)
         if role:
             raise CustomException(msg='创建失败，该角色已存在')
+        obj = await RoleCRUD(auth).get(code=data.code)
+        if obj:
+            raise CustomException(msg='创建失败，编码已存在')
         new_role = await RoleCRUD(auth).create(data=data)
         return RoleOutSchema.model_validate(new_role).model_dump()
 

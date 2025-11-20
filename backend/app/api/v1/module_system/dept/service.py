@@ -84,6 +84,9 @@ class DeptService:
         dept = await DeptCRUD(auth).get(name=data.name)
         if dept:
             raise CustomException(msg='创建失败，该部门已存在')
+        obj = await DeptCRUD(auth).get(code=data.code)
+        if obj:
+            raise CustomException(msg='创建失败，编码已存在')
         dept = await DeptCRUD(auth).create(data=data)
         return DeptOutSchema.model_validate(dept).model_dump()
 
