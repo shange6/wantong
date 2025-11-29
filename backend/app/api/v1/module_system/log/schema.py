@@ -11,20 +11,23 @@ from app.core.base_schema import BaseSchema, UserBySchema, TenantSchema, Custome
 
 class OperationLogCreateSchema(BaseModel):
     """日志创建模型"""
-    type: Optional[int] = Field(default=None, description="日志类型(1登录日志 2操作日志)")
-    request_path: Optional[str] = Field(default=None, description="请求路径")
-    request_method: Optional[str] = Field(default=None, description="请求方法")
-    request_payload: Optional[str] = Field(default=None, description="请求负载")
-    request_ip: Optional[str] = Field(default=None, description="请求 IP 地址")
-    login_location: Optional[str] = Field(default=None, description="登录位置")
-    request_os: Optional[str] = Field(default=None, description="请求操作系统")
-    request_browser: Optional[str] = Field(default=None, description="请求浏览器")
-    response_code: Optional[int] = Field(default=None, description="响应状态码")
-    response_json: Optional[str] = Field(default=None, description="响应 JSON 数据")
-    process_time: Optional[str] = Field(default=None, description="处理时间")
-    status: Optional[str] = Field(default="0", description="是否成功")
-    description: Optional[str] = Field(default=None, max_length=255, description="描述")
-    created_id: Optional[int] = Field(default=None, description="创建人ID")
+    type: int | None = Field(default=None, description="日志类型(1登录日志 2操作日志)")
+    request_path: str | None = Field(default=None, description="请求路径")
+    request_method: str | None = Field(default=None, description="请求方法")
+    request_payload: str | None = Field(default=None, description="请求负载")
+    request_ip: str | None = Field(default=None, description="请求 IP 地址")
+    login_location: str | None = Field(default=None, description="登录位置")
+    request_os: str | None = Field(default=None, description="请求操作系统")
+    request_browser: str | None = Field(default=None, description="请求浏览器")
+    response_code: int | None = Field(default=None, description="响应状态码")
+    response_json: str | None = Field(default=None, description="响应 JSON 数据")
+    process_time: str | None = Field(default=None, description="处理时间")
+    status: str | None = Field(default="0", description="是否成功")
+    description: str | None = Field(default=None, max_length=255, description="描述")
+    created_id: int | None = Field(default=None, description="创建人ID")
+    updated_id: int | None = Field(default=None, description="更新人ID")
+    tenant_id: int | None = Field(default=None, description="租户ID")
+    customer_id: int | None = Field(default=None, description="客户ID")
 
     @field_validator("type")
     @classmethod
@@ -67,13 +70,13 @@ class OperationLogQueryParam:
 
     def __init__(
         self,
-        type: Optional[int] = Query(None, description="日志类型(1:登录日志, 2:操作日志)"),
-        request_path: Optional[str] = Query(None, description="请求路径"),
-        request_method: Optional[str] = Query(None, description="请求方法"),
-        request_ip: Optional[str] = Query(None, description="请求IP"),
-        response_code: Optional[int] = Query(None, description="响应状态码"),
-        created_id: Optional[int] = Query(None, description="创建人"),
-        created_time: Optional[list[DateTimeStr]] = Query(None, description="创建时间范围", example=["2025-01-01 00:00:00", "2025-12-31 23:59:59"]),
+        type: int | None = Query(None, description="日志类型(1:登录日志, 2:操作日志)"),
+        request_path: str | None = Query(None, description="请求路径"),
+        request_method: str | None = Query(None, description="请求方法"),
+        request_ip: str | None = Query(None, description="请求IP"),
+        response_code: int | None = Query(None, description="响应状态码"),
+        created_id: int | None = Query(None, description="创建人"),
+        created_time: list[DateTimeStr] | None = Query(None, description="创建时间范围", example=["2025-01-01 00:00:00", "2025-12-31 23:59:59"]),
     ) -> None:
         
         # 模糊查询字段

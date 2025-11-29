@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from typing import Optional, Union
 from datetime import datetime
 from pydantic import ConfigDict, Field, BaseModel, model_validator
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -21,8 +20,8 @@ class JWTPayloadSchema(BaseModel):
     """JWT载荷模型"""
     sub: str = Field(..., description='用户登录信息')
     is_refresh: bool = Field(default=False, description='是否刷新token')
-    exp: Union[datetime, int] = Field(..., description='过期时间')
-    tenant_id: Optional[int] = Field(default=None, description='租户ID')
+    exp: datetime | int = Field(..., description='过期时间')
+    tenant_id: int | None = Field(default=None, description='租户ID')
 
     @model_validator(mode='after')
     def validate_fields(self):

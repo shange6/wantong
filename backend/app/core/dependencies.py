@@ -106,6 +106,9 @@ async def get_current_user(
     # 设置请求上下文
     request.scope["user_id"] = user.id
     request.scope["user_username"] = user.username
+    request.scope["user_tenant_id"] = user.tenant_id
+    request.scope["user_customer_id"] = user.customer_id
+    
     
     # 过滤可用的角色和职位
     if hasattr(user, 'roles'):

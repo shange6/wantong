@@ -97,9 +97,15 @@ class OperationLogRoute(APIRoute):
             # 获取当前用户ID,如果是登录接口则为空
             log_type = 1 # 1:登录日志 2:操作日志
             current_user_id = None
+            tenant_id = 1
+            customer_id = None
+
             # 优化：只在操作日志场景下获取current_user_id
             if "user_id" in request.scope:
                 current_user_id = request.scope.get("user_id")
+                tenant_id = request.scope.get("user_tenant_id")
+                customer_id = request.scope.get("user_customer_id")
+
                 log_type = 2
             
             request_ip = None
@@ -139,7 +145,10 @@ class OperationLogRoute(APIRoute):
                             response_json = response_data.decode() if isinstance(response_data, (bytes, bytearray)) else str(response_data),
                             process_time = process_time,
                             description = route.summary,
-                            created_id = current_user_id
+                            created_id = current_user_id,
+                            updated_id = current_user_id,
+                            tenant_id = tenant_id,
+                            customer_id = customer_id
                         ), auth = auth) 
             
             return response

@@ -111,7 +111,7 @@ class UserMixin(MappedBase):
     )
 
     @declared_attr
-    def created_by(cls) -> Mapped["UserModel | None"]:
+    def created_by(cls) -> Mapped["UserModel"]:
         """
         创建人关联关系（延迟加载，避免循环依赖）
         """
@@ -125,7 +125,7 @@ class UserMixin(MappedBase):
         )
 
     @declared_attr
-    def updated_by(cls) -> Mapped["UserModel | None"]:
+    def updated_by(cls) -> Mapped["UserModel"]:
         """
         更新人关联关系（延迟加载，避免循环依赖）
         """
@@ -141,13 +141,12 @@ class UserMixin(MappedBase):
 
 class TenantMixin(MappedBase):
     """
-    租户隔离字段 Mixin
+    租户字段 Mixin
     
-    用于实现多租户SaaS架构的核心数据隔离
-    几乎所有业务表都需要此字段
+    用于实现多租户SaaS架构的核心隔离
     """
     __abstract__: bool = True
-    
+
     tenant_id: Mapped[int | None] = mapped_column(
         Integer,
         ForeignKey('sys_tenant.id', ondelete="CASCADE", onupdate="CASCADE"),
@@ -157,7 +156,7 @@ class TenantMixin(MappedBase):
     )
 
     @declared_attr
-    def tenant(cls) -> Mapped["TenantModel | None"]:
+    def tenant(cls) -> Mapped["TenantModel"]:
         """
         租户关联关系（延迟加载，避免循环依赖）
         """
@@ -182,7 +181,7 @@ class CustomerMixin(MappedBase):
     - 客户专属通知/日志 (可选)
     """
     __abstract__: bool = True
-    
+
     customer_id: Mapped[int | None] = mapped_column(
         Integer,
         ForeignKey('sys_customer.id', ondelete="CASCADE", onupdate="CASCADE"),
@@ -193,7 +192,7 @@ class CustomerMixin(MappedBase):
     )
 
     @declared_attr
-    def customer(cls) -> Mapped["CustomerModel | None"]:
+    def customer(cls) -> Mapped["CustomerModel"]:
         """
         客户关联关系（延迟加载，避免循环依赖）
         """
