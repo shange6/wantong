@@ -310,12 +310,6 @@ async def get_list(
 2. **编写页面组件**：在 `frontend/src/views/` 目录下创建页面组件
 3. **注册路由**：在 `frontend/src/router/index.ts` 中注册路由
 
-### 移动端部分
-
-1. **配置移动端API**：在 `fastapp/src/api/` 目录下创建对应的API文件
-2. **编写页面组件**：在 `fastapp/src/pages/` 目录下创建页面组件
-3. **注册路由**：在 `fastapp/src/router/index.ts` 中注册路由
-
 ### 代码生成器使用
 
 项目内置代码生成器，可以根据数据库表结构自动生成前后端代码，大幅提升开发效率。

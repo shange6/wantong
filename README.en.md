@@ -326,12 +326,6 @@ async def get_list(
 2. **Write Page Components**: Create page components in `frontend/src/views/` directory
 3. **Register Routes**: Register routes in `frontend/src/router/index.ts`
 
-### Mobile Part
-
-1. **Configure Mobile API**: Create corresponding API files in `fastapp/src/api/` directory
-2. **Write Page Components**: Create page components in `fastapp/src/pages/` directory
-3. **Register Routes**: Register routes in `fastapp/src/router/index.ts`
-
 ### Code Generator Usage
 
 The project has a built-in code generator that can automatically generate front-end and back-end code based on database table structures, greatly improving development efficiency.
