@@ -36,10 +36,14 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[Any, Any]:
     from app.api.v1.module_system.dict.service import DictDataService
     from app.api.v1.module_system.params.service import ParamsService
     from app.plugin.module_application.job.tools.ap_scheduler import SchedulerUtil
-
+    from app.core.database import redis_connect  # 💡 导入你的这个函数
     try:
         await InitializeData().init_db()
         log.info(f"✅ {settings.DATABASE_TYPE}数据库初始化完成")
+        # 1. 显式初始化 Redis 并挂载到 state
+        # 即使 import_modules_async 也会调，这里手动调一次能确保万无一失
+        await redis_connect(app, status=True) 
+        log.info("✅ Redis 物理连接已确立并挂载到 app.state")
         await import_modules_async(
             modules=settings.EVENT_LIST, desc="全局事件", app=app, status=True
         )

@@ -137,6 +137,9 @@ async def redis_connect(app: FastAPI, status: str) -> Redis | None:
         )
 
     if status:
+        # 如果已经存在连接且存活，直接返回
+        if hasattr(app.state, 'redis') and app.state.redis:
+            return app.state.redis
         try:
             rd = await Redis.from_url(
                 url=settings.REDIS_URI,
