@@ -7,7 +7,9 @@ from fastapi import UploadFile
 from app.config.setting import settings
 from app.core.exceptions import CustomException
 from app.core.logger import log
-from .schema import DataUploadSchema
+from app.core.database import async_db_session
+from .schema import DataUploadSchema, SaveDataSchema
+from .model import OrderProjectModel, OrderComponentModel, OrderDetailModel
 from .dwg2dict import dwg2dxf, dxf2dict
 from .wtdata import getwtcode
 from .list2tree import list2tree
@@ -64,14 +66,57 @@ class DataService:
 
             return list2tree(getwtcode(dxf2dict(dwg2dxf(file_path))))
 
-            return DataUploadSchema(
-                filename=filename,
-                file_url=file_url,
-                file_size=len(content),
-                upload_time=datetime.now(),
-            ).model_dump(mode="json")
-
         except Exception as e:
             log.error(f"文件上传失败: {e!s}")
             raise CustomException(msg=f"文件上传失败: {e!s}")
 
+    @classmethod
+    async def save_data_service(cls, payload: SaveDataSchema) -> None:
+        """
+        保存订单数据
+        """
+        async with async_db_session() as session:
+            async with session.begin():
+                # 1. 保存项目信息
+                # 暂时每次都创建新项目记录，或者根据 contractNo/projectCode 判断是否存在
+                # 这里简单处理，每次保存都视为新的入库记录（或者同一个项目的不同批次）
+                project = OrderProjectModel(
+                    project_name=payload.project_info.projectName,
+                    project_code=payload.project_info.projectCode,
+                    contract_no=payload.project_info.contractNo,
+                )
+                session.add(project)
+                await session.flush()  # 获取 project.id
+
+                # 2. 保存组件信息
+                component = OrderComponentModel(
+                    project_id=project.id,
+                    parent_code=payload.component_info.parentCode,
+                    component_name=payload.component_info.componentName,
+                    component_code=payload.component_info.componentCode,
+                    component_count=payload.component_info.componentCount,
+                )
+                session.add(component)
+                await session.flush()  # 获取 component.id
+
+                # 3. 保存明细信息
+                details = []
+                for item in payload.details:
+                    # 处理 count 可能是 str 或 int
+                    count_val = str(item.count) if item.count is not None else None
+                    
+                    detail = OrderDetailModel(
+                        component_id=component.id,
+                        wtcode=item.wtcode,
+                        code=item.code,
+                        spec=item.spec,
+                        count=count_val,
+                        material=item.material,
+                        unit_mass=item.unit_mass,
+                        total_mass=item.total_mass,
+                        remark=item.remark,
+                    )
+                    details.append(detail)
+                
+                session.add_all(details)
+                # 提交事务由 async with session.begin() 自动处理
