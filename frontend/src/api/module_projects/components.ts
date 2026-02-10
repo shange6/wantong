@@ -19,6 +19,10 @@ export interface ComponentsForm {
   code: string;
   name: string;
   count: number;
+  material: string;
+  unit_mass: number;
+  total_mass: number;
+  remark: string;
 }
 
 export interface ComponentsData {
@@ -29,11 +33,15 @@ export interface ComponentsData {
   code: string;
   name: string;
   count: number;
+  material: string;
+  unit_mass: number;
+  total_mass: number;
+  remark: string;
   created_time: string;
   updated_time: string;
 }
 
-class ComponentsAPI {
+export class ComponentsAPI {
   static getList(params: ComponentsQuery) {
     return request({
       url: `${API_PATH}/list`, 

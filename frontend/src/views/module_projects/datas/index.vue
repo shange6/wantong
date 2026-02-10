@@ -87,7 +87,7 @@
         <template #empty>
           <el-empty :image-size="80" description="暂无数据" />
         </template>
-        <el-table-column type="selection" fixed min-width="55" align="center" />
+        <el-table-column type="selection" fixed min-width="30" align="center" />
         <el-table-column label="万通码" prop="wtcode" min-width="150" show-overflow-tooltip sortable>
           <template #default="{ row }">
             {{ row.wtcode?.includes('.') ? row.wtcode.slice(row.wtcode.indexOf('.') + 1) : row.wtcode }}
