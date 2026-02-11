@@ -1,11 +1,12 @@
 import request from "@/utils/request";
 
-const API_PATH = "/projects/components";
+const API_PATH = "/projects/parts";
 
-export interface ComponentsQuery {
+export interface PartsQuery {
   page_no?: number;
   page_size?: number;
   project_code?: string;
+  component_wtcode?: string;
   wtcode?: string;
   code?: string;
   spec?: string;
@@ -13,7 +14,7 @@ export interface ComponentsQuery {
   remark?: string;
 }
 
-export interface ComponentsForm {
+export interface PartsForm {
   id?: number;
   project_code: string;
   parent_code: string;
@@ -27,7 +28,7 @@ export interface ComponentsForm {
   remark: string;
 }
 
-export interface ComponentsData {
+export interface PartsData {
   id: number;
   project_code: string;
   parent_code: string;
@@ -39,12 +40,13 @@ export interface ComponentsData {
   unit_mass: number;
   total_mass: number;
   remark: string;
+  children?: PartsData[];
   created_time: string;
   updated_time: string;
 }
 
-export class ComponentsAPI {
-  static getList(params: ComponentsQuery) {
+export class PartsAPI {
+  static getList(params: PartsQuery) {
     return request({
       url: `${API_PATH}/list`, 
       method: "get",
@@ -52,7 +54,7 @@ export class ComponentsAPI {
     });
   }
 
-  static create(data: ComponentsForm) {
+  static create(data: PartsForm) {
     return request({
       url: `${API_PATH}/create`,
       method: "post",
@@ -60,7 +62,7 @@ export class ComponentsAPI {
     });
   }
 
-  static update(id: number, data: Partial<ComponentsForm>) {
+  static update(id: number, data: Partial<PartsForm>) {
     return request({
       url: `${API_PATH}/update/${id}`,
       method: "put",
@@ -77,4 +79,4 @@ export class ComponentsAPI {
   }
 }
 
-export default ComponentsAPI;
+export default PartsAPI;

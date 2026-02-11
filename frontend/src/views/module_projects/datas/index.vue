@@ -67,45 +67,11 @@
       </el-form>
     </div>
 
-    <!-- 内容区域 -->
-    <el-card v-if="isShow" class="data-table">
-      <!-- 功能区域 -->
-      <!-- 表格区域 -->
-      <el-table
-        ref="dataTableRef"
-        row-key="wtcode"
-        :data="pageTableData"
-        :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
-        :header-cell-style="{ textAlign: 'center' }"
-        class="data-table__content"
-        border
-        stripe
-        :default-sort="{ prop: 'wtcode', order: 'ascending' }"
-        @selection-change="handleSelectionChange"
-        @row-click="handleRowClick"
-      >
-        <template #empty>
-          <el-empty :image-size="80" description="暂无数据" />
-        </template>
-        <el-table-column type="selection" fixed min-width="30" align="center" />
-        <el-table-column label="万通码" prop="wtcode" min-width="150" show-overflow-tooltip sortable>
-          <template #default="{ row }">
-            {{ row.wtcode?.includes('.') ? row.wtcode.slice(row.wtcode.indexOf('.') + 1) : row.wtcode }}
-          </template>          
-        </el-table-column>
-        <el-table-column label="编号" prop="code" min-width="150" show-overflow-tooltip></el-table-column>
-        <el-table-column label="名称"prop="spec" min-width="150" show-overflow-tooltip></el-table-column>
-        <el-table-column label="数量" prop="count" align="center" min-width="45"></el-table-column>
-        <el-table-column label="材料" prop="material" align="center" min-width="100" show-overflow-tooltip></el-table-column>
-        <el-table-column label="单重" prop="unit_mass" align="center" min-width="60"></el-table-column>
-        <el-table-column label="总重" prop="total_mass" align="center" min-width="70"></el-table-column>
-        <el-table-column label="备注" prop="remark" min-width="120" show-overflow-tooltip></el-table-column>        
-
-      </el-table>
-    </el-card>
+    <!-- 内容区域 -->     
+    <PartsTable v-show="!isShow" :table-data="pageTableData" />
 
     <!-- 空数据时显示上传组件 -->
-     <el-row v-if="!isShow" :gutter="20"">
+     <el-row v-show="isShow" :gutter="20">
       <el-col :span="8">
         <el-card class="upload-card">
           <div class="upload-wrapper">
@@ -175,7 +141,7 @@
       </el-col>
     </el-row>
     <!-- 显示解析日志 -->
-    <el-card v-if="!isShow" class="info-card">
+    <el-card v-show="isShow" class="info-card">
       <template #header>
         <div class="card-header">
           <span>详细解析日志</span>
@@ -196,21 +162,17 @@
 <script setup lang="ts">
 
 defineOptions({
-  name: "Data",
+  name: "Datas",
   inheritAttrs: false,
 });
 
 import { useAppStore } from "@/store/modules/app.store";
 import { useUserStore } from "@/store/modules/user.store";
 import DatasAPI, { DatasPageQuery, UploadInnerData } from "@/api/module_projects/datas";
-import MenuAPI, { MenuPageQuery, MenuForm, MenuTable } from "@/api/module_system/menu";
-import { MenuTypeEnum } from "@/enums/system/menu.enum";
-import { formatTree } from "@/utils/common";
-import { formatToDateTime } from "@/utils/dateUtil";
-import { isHeritageClause } from "typescript";
-
-const appStore = useAppStore();
-const userStore = useUserStore();
+import ComponentsTable from '../ComponentsTable.vue';
+// import { ComponentsData } from "@/api/module_projects/components";
+import PartsTable from '../PartsTable.vue';
+import PartsAPI, { PartsData } from '@/api/module_projects/parts';
 
 const queryFormRef = ref();
 const dataTableRef = ref();
@@ -223,24 +185,17 @@ const uploadFileList = ref<any[]>([]);
 const uploading = ref(false);
 const currentPath = ref("/");
 const total = ref(0);
-
-const isExpand = ref(false);
-const isExpandable = ref(true);
-
+const pageTableData = ref<PartsData[]>([]);
 // 1. 显式定义 tableSourceData，给它一个初始结构
 const tableSourceData = ref<UploadInnerData>();
 
 // 是否显示上传组件，文件解析结果和日志
-const isShow = ref(false)
-// 分页表单
-const pageTableData = ref<MenuTable[]>([]);
+const isShow = ref(true)
 
 // 根据文本内容返回对应的颜色类名或直接返回颜色值
 const getLogColor = (text: string) => {
   if (text.includes('错误')) {  return "var(--el-color-primary)"; }
 };
-
-
 
 //  递归排序：同时处理当前层级及所有子节点的万通码排序
 const sortTableTree = (items: any[]) => {
@@ -290,38 +245,33 @@ const dateRange = ref<[Date, Date] | []>([]);
 
 // 树形数据递归过滤
 const filterTreeData = (nodes: any[], query: DatasPageQuery): any[] => {
-  if (!nodes || nodes.length === 0) return [];
-  
-  const result: any[] = [];
   const qCode = query.code?.trim().toLowerCase();
   const qSpec = query.spec?.trim().toLowerCase();
   const qMaterial = query.material?.trim().toLowerCase();
-  
-  for (const node of nodes) {
-    const nCode = (node.code || "").toString().toLowerCase();
-    const nSpec = (node.spec || "").toString().toLowerCase();
-    const nMaterial = (node.material || "").toString().toLowerCase();
-    const nRemark = (node.remark || "").toString().toLowerCase();
-    
-    const matchCode = !qCode || nCode.includes(qCode);
-    const matchSpec = !qSpec || nSpec.includes(qSpec);
-    // 匹配材料 OR 备注
-    const matchMaterial = !qMaterial || nMaterial.includes(qMaterial) || nRemark.includes(qMaterial);
-    
-    const isSelfMatch = matchCode && matchSpec && matchMaterial;
-    
-    // 递归过滤子节点
-    const filteredChildren = filterTreeData(node.children || [], query);
-    const hasMatchingChildren = filteredChildren.length > 0;
-    
-    if (isSelfMatch || hasMatchingChildren) {
-      const newNode = { ...node };
-      // 保留匹配的子节点路径
-      newNode.children = filteredChildren;
-      result.push(newNode);
-    }
-  }
-  return result;
+
+  return nodes
+    .map((node) => {
+      // 1. 先递归处理子节点
+      const filteredChildren = node.children ? filterTreeData(node.children, query) : [];
+      
+      // 2. 检查当前节点是否匹配
+      const nCode = String(node.code || "").toLowerCase();
+      const nSpec = String(node.spec || "").toLowerCase();
+      const nMaterial = String(node.material || "").toLowerCase();
+      const nRemark = String(node.remark || "").toLowerCase();
+
+      const isSelfMatch = 
+        (!qCode || nCode.includes(qCode)) &&
+        (!qSpec || nSpec.includes(qSpec)) &&
+        (!qMaterial || nMaterial.includes(qMaterial) || nRemark.includes(qMaterial));
+
+      // 3. 如果自身匹配或子节点有匹配项，则返回该节点副本
+      if (isSelfMatch || filteredChildren.length > 0) {
+        return { ...node, children: filteredChildren };
+      }
+      return null;
+    })
+    .filter((node): node is any => node !== null); // 4. 过滤掉不匹配的项
 };
 
 // 查询（前端过滤）
@@ -348,7 +298,7 @@ async function handleQuery() {
     
     // 如果有筛选结果，切换到表格视图
     if (filtered.length > 0 && !isShow.value) {
-      isShow.value = true;
+      isShow.value = false;
     }
   } finally {
     loading.value = false;
@@ -367,11 +317,6 @@ async function handleResetQuery() {
 // 行复选框选中项变化
 async function handleSelectionChange(selection: any) {
   selectIds.value = selection.map((item: any) => item.id);
-}
-
-// 行点击事件
-async function handleRowClick(row: MenuTable) {
-  selectedMenuId.value = row.id;
 }
 
 async function deleteData() {
@@ -393,7 +338,7 @@ async function deleteData() {
     // 4. 重置查询表单
     queryFormRef.value?.resetFields();
     // 5. 隐藏数据表，显示上传组件
-    isShow.value = false;
+    isShow.value = true;
 }
 
 // 放弃当前数据：销毁对象、清空表格、切换视图
@@ -464,7 +409,7 @@ async function handleSaveToDB() {
         project_code: uploadResult.componentCode.substring(0, uploadResult.componentCode.lastIndexOf('.')),
         wtcode: flatDetails[0]["wtcode"],
         code: flatDetails[0]["code"],
-        name: flatDetails[0]["spec"],
+        spec: flatDetails[0]["spec"],
         count: flatDetails[0]["count"],
         material: flatDetails[0]["material"],
         unit_mass: flatDetails[0]["unit_mass"],
@@ -529,9 +474,11 @@ async function handleHttpRequest(options: any) {
     // 7. 执行递归排序
     sortTableTree(data);
     // 8. 赋值给分页数据
-    pageTableData.value = data;
+    pageTableData.value = data as any[];
     // 9. 更新表格总条数
     total.value = pageTableData.value.length;
+    // 10. 自动切换到表格视图
+    isShow.value = false;
 
   } catch (error) {
     console.error("上传失败:", error);
@@ -544,23 +491,6 @@ async function handleHttpRequest(options: any) {
 </script>
 
 <style lang="scss" scoped>
-.app-container {
-  height: calc(100vh - 84px);
-  display: flex;
-  flex-direction: column;
-}
-
-.data-table {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  
-  .data-table__content {
-    flex: 1;
-    height: 100%;
-  }
-}
 
 /* 卡片基础间距 */
 .upload-card,
@@ -609,7 +539,7 @@ async function handleHttpRequest(options: any) {
 /* 内容样式 (白色区域) */
 .grid-content {
   // flex: 1;
-  padding: 12px;
+  padding: 10px;
   color: var(--el-color-primary);
   display: flex;
   align-items: center;
@@ -622,7 +552,7 @@ async function handleHttpRequest(options: any) {
 .border-left { border-left: 1px solid var(--el-border-color); }
 .info-card {
   flex: 1;
-  margin-top: 16px;
+  margin-top: 10px;
   overflow: auto;
 }
 

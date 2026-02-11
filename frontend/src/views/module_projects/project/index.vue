@@ -64,8 +64,21 @@
         <el-table-column label="名称"prop="name" min-width="200" show-overflow-tooltip></el-table-column>
         <el-table-column label="合同号" prop="no" min-width="80" align="center"></el-table-column>
       </el-table>
+      
+      <!-- 分页区域 -->
+      <div class="pagination-container">
+        <el-pagination
+          v-model:current-page="pagination.page_no"
+          v-model:page-size="pagination.page_size"
+          :total="total"
+          :page-sizes="[10, 20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
+          @size-change="handleQuery"
+          @current-change="handleQuery"
+        />
+      </div>
+      
     </el-card>
-
   </div>
 </template>
 
@@ -229,3 +242,34 @@ function resetForm() {
   formRef.value?.resetFields();
 }
 </script>
+
+<style scoped>
+
+/* 让 el-card 撑满父容器 (抽屉body)，并内部也使用 Flex 布局 */
+.data-table {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* 防止出现双滚动条 */
+}
+
+/* 重点：让 card 的 body 部分撑满 */
+:deep(.el-card__body) {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 10px; /* 保持内边距 */
+  overflow: hidden;
+}
+
+/* 让表格占据剩余的所有空间 */
+.data-table__content {
+  flex: 1;
+}
+
+.pagination-container {
+  margin-top: 10px;
+  justify-content: flex-end;
+}
+
+</style>

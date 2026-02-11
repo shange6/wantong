@@ -9,7 +9,7 @@ class ComponentsBase(BaseModel):
     project_code: str
     wtcode: str
     code: str
-    name: str
+    spec: str
     count: int
     material: str
     unit_mass: float | None = None
@@ -30,7 +30,7 @@ class ComponentsUpdate(BaseModel):
     parent_code: Optional[str] = None
     wtcode: Optional[str] = None
     code: Optional[str] = None
-    name: Optional[str] = None
+    spec: Optional[str] = None
     count: Optional[int] = None
     material: Optional[str] = None
     unit_mass: Optional[float] = None
@@ -44,7 +44,7 @@ class ComponentsFilter(BaseModel):
     project_code: Optional[str] = None
     wtcode: Optional[str] = None
     code: Optional[str] = None
-    name: Optional[str] = None
+    spec: Optional[str] = None
     material: Optional[str] = None
     remark: Optional[str] = None
 

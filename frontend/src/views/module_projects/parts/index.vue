@@ -10,35 +10,20 @@
         label-suffix=":"
         @submit.prevent="handleQuery"
       >
-        <el-form-item prop="project_code" label="项目">
-          <el-select
-            v-model="queryFormData.project_code"
-            placeholder="请选择项目"
-            style="width: 150px"
-            clearable
-            filterable
-          >
-            <el-option
-              v-for="item in projectList"
-              :key="item.id"
-              :label="item.name"
-              :value="item.code"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item prop="wtcode" label="万通码">
-          <el-input v-model="queryFormData.wtcode" placeholder="输入万通码" clearable style="width: 100px"/>
-        </el-form-item>
+
         <el-form-item prop="code" label="代号">
           <el-input v-model="queryFormData.code" placeholder="输入代号" clearable style="width: 100px"/>
         </el-form-item>
-        <el-form-item prop="name" label="名称">
-          <el-input v-model="queryFormData.name" placeholder="输入名称" clearable style="width: 100px"/>
+        <el-form-item prop="spec" label="规格">
+          <el-input v-model="queryFormData.spec" placeholder="输入规格" clearable style="width: 100px"/>
+        </el-form-item>
+        <el-form-item prop="material" label="材料/备注">
+          <el-input v-model="queryFormData.material" placeholder="输入材料/备注" clearable style="width: 100px"/>
         </el-form-item>
         <!-- 查询、重置、展开/收起按钮 -->
         <el-form-item class="search-buttons">
           <el-button
-            v-hasPerm="['module_projects:components:query']"
+            v-hasPerm="['module_projects:parts:query']"
             type="primary"
             icon="search"
             native-type="submit"
@@ -46,312 +31,182 @@
             查询
           </el-button>
           <el-button
-            v-hasPerm="['module_projects:components:query']"
+            v-hasPerm="['module_projects:parts:query']"
             icon="refresh"
             @click="handleResetQuery"
           >
             重置
           </el-button>
+          <el-button
+            v-hasPerm="['module_projects:parts:query']"
+            type="info"
+            icon="arrow-right"
+            @click="handleOpenProjectDrawer"
+          >
+            项目
+          </el-button>
+          <el-button
+            v-hasPerm="['module_projects:parts:query']"
+            icon="refresh"
+            @click="isShow = !isShow"
+          >
+            切换
+          </el-button>
           <!-- 展开/收起 -->          
         </el-form-item>
       </el-form>
     </div>
-
-    <!-- 内容区域 -->
-    <el-card class="data-table">
-      <!-- 功能区域 -->
-
-      <!-- 表格区域 -->
-      <el-table
-        ref="dataTableRef"
-        v-loading="loading"
-        :data="pageTableData"
-        :header-cell-style="{ textAlign: 'center' }"
-        class="data-table__content"
-        border
-        stripe
-        @selection-change="handleSelectionChange"
-        @row-click="handleRowClick"
-      >
-        <template #empty>
-          <el-empty :image-size="80" description="暂无数据" />
-        </template>
-        <el-table-column type="selection" fixed min-width="40" align="center" />
-        <el-table-column label="万通码" prop="wtcode" min-width="100" show-overflow-tooltip></el-table-column>
-        <el-table-column label="代号" prop="code" min-width="100" show-overflow-tooltip></el-table-column>
-        <el-table-column label="名称" prop="name" min-width="150" show-overflow-tooltip></el-table-column>
-        <el-table-column label="数量" prop="count" align="center" min-width="40"></el-table-column>
-        <el-table-column label="单重" prop="unit_mass" align="center" min-width="50"></el-table-column>
-        <el-table-column label="总重" prop="total_mass" align="center" min-width="60"></el-table-column>
-        <el-table-column label="备注" prop="remark" min-width="100" show-overflow-tooltip></el-table-column>
-      </el-table>
-
-      <!-- 分页区域 -->
-      <div class="pagination-container">
-        <el-pagination
-          v-model:current-page="pagination.page_no"
-          v-model:page-size="pagination.page_size"
-          :total="total"
-          :page-sizes="[10, 20, 50, 100]"
-          layout="total, sizes, prev, pager, next, jumper"
-          @size-change="handleQuery"
-          @current-change="handleQuery"
-        />
-      </div>
-    </el-card>
-
-    <!-- 新增/编辑弹窗 -->
-    <el-dialog
-      v-model="dialog.visible"
-      :title="dialog.title"
-      width="500px"
-      append-to-body
-      @close="resetForm"
-    >
-      <el-form ref="formRef" :model="formData" :rules="rules" label-width="100px">
-        <el-form-item label="项目编号" prop="project_code">
-          <el-input v-model="formData.project_code" placeholder="请输入项目编号" />
-        </el-form-item>
-        <el-form-item label="万通编码" prop="wtcode">
-          <el-input v-model="formData.wtcode" placeholder="请输入万通编码" :disabled="!!formData.id" />
-        </el-form-item>
-        <el-form-item label="组件编码" prop="code">
-          <el-input v-model="formData.code" placeholder="请输入组件编码" />
-        </el-form-item>
-        <el-form-item label="组件名称" prop="name">
-          <el-input v-model="formData.name" placeholder="请输入组件名称" />
-        </el-form-item>
-        <el-form-item label="父级编码" prop="parent_code">
-          <el-input v-model="formData.parent_code" placeholder="请输入父级编码" />
-        </el-form-item>
-        <el-form-item label="组件数量" prop="count">
-          <el-input-number v-model="formData.count" :min="1" placeholder="请输入组件数量" style="width: 100%" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button @click="dialog.visible = false">取消</el-button>
-          <el-button type="primary" @click="submitForm">确定</el-button>
-        </div>
-      </template>
-    </el-dialog>
+    <!-- 内容区域 (封装为组件) -->
+    <ComponentsTable ref="componentsTableRef" v-show="isShow" :query-params="queryComponentsFormData" @row-click="handleComponentRowClick" />
+    <PartsTable ref="partsTableRef" v-show="!isShow" :query-params="queryPartsFormData" />  
+    <ProjectTable ref="projectTableRef" v-model:drawerVisible="projectDrawerVisible" @row-click="handleProjectRowClick"/>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
-import { ElMessage, ElMessageBox } from 'element-plus';
-import ComponentsAPI, { ComponentsData, ComponentsForm, ComponentsQuery } from '@/api/module_projects/components';
-import ProjectAPI, { ProjectData } from '@/api/module_projects/project';
+import { ref, reactive, onMounted, nextTick } from 'vue';
+import { ComponentsQuery, ComponentsData } from '@/api/module_projects/components';
+import { PartsQuery } from '@/api/module_projects/parts';
+// 引入业务组件
+import ComponentsTable from '../ComponentsTable.vue'; // 组件表格（树形）
+import PartsTable from '../PartsTable.vue';           // 零件表格
+import ProjectTable from '../ProjectTable.vue';       // 项目选择侧边栏/弹窗
 
 defineOptions({
-  name: "Components",
+  name: "Parts", // 命名组件，利于 Keep-alive 缓存
 });
 
-// 查询表单
-const queryFormRef = ref();
-const queryFormData = reactive<ComponentsQuery>({
-  project_code: undefined,
-  wtcode: undefined,
+/** ----------------------------------------------------------------
+ * 1. 响应式变量声明 (Refs & States)
+ * ---------------------------------------------------------------- */
+
+// UI 控制状态
+const isShow = ref(true);               // 切换显示：true 展示组件表，false 展示零件表
+const projectDrawerVisible = ref(false); // 控制项目选择侧边栏的显示/隐藏
+
+// 组件实例引用 (用于调用子组件暴露的方法)
+const componentsTableRef = ref();       // 对应 ComponentsTable 实例
+const partsTableRef = ref();            // 对应 PartsTable 实例
+const projectTableRef = ref();          // 对应 ProjectTable 实例
+
+// 搜索表单引用
+const queryFormRef = ref();             // 顶层搜索表单的引用
+
+/** ----------------------------------------------------------------
+ * 2. 查询参数管理 (Query Data)
+ * ---------------------------------------------------------------- */
+
+// 统一的表单数据源 (双向绑定到 el-input)
+const queryFormData = reactive({
   code: undefined,
-  name: undefined,
+  spec: undefined,
+  material: undefined,
+  wtcode: undefined,
 });
 
-// 表格数据
-const loading = ref(false);
-const pageTableData = ref<ComponentsData[]>([]);
-const total = ref(0);
-const selectIds = ref<number[]>([]);
-const pagination = reactive({
-  page_no: 1,
-  page_size: 10,
+// 计算属性或同步逻辑：将顶层表单数据同步到两个子表的查询对象中
+// 组件表查询参数
+const queryComponentsFormData = reactive<ComponentsQuery>({
+  project_code: undefined,
+  code: undefined,
+  spec: undefined,
+  material: undefined,
 });
 
-// 项目列表
-const projectList = ref<ProjectData[]>([]);
-
-// 获取项目列表
-async function getProjectList() {
-  try {
-    const res = await ProjectAPI.getList({ page_no: 1, page_size: 100 });
-    projectList.value = res.data.data.items;
-  } catch (error) {
-    console.error("获取项目列表失败:", error);
-  }
-}
-
-// 弹窗控制
-const dialog = reactive({
-  visible: false,
-  title: "",
+// 零件表查询参数
+const queryPartsFormData = reactive<PartsQuery>({
+  project_code: undefined,
+  code: undefined,
+  spec: undefined,
+  material: undefined,
 });
 
-// 表单数据
-const formRef = ref();
-const formData = reactive<ComponentsForm>({
-  project_code: "",
-  wtcode: "",
-  code: "",
-  name: "",
-  parent_code: "",
-  count: 1,
-});
+/** ----------------------------------------------------------------
+ * 3. 核心业务逻辑 (Business Logic)
+ * ---------------------------------------------------------------- */
 
-// 表单校验规则
-const rules = {
-  project_code: [{ required: true, message: "请输入项目编号", trigger: "blur" }],
-  wtcode: [{ required: true, message: "请输入万通编码", trigger: "blur" }],
-  code: [{ required: true, message: "请输入组件编码", trigger: "blur" }],
-  name: [{ required: true, message: "请输入组件名称", trigger: "blur" }],
-  count: [{ required: true, message: "请输入组件数量", trigger: "blur" }],
-};
+/**
+ * 执行查询操作
+ * 触发当前可见表格组件的内部查询方法
+ */
+function handleQuery() {
+  // 同步主表单数据到子表参数对象
+  Object.assign(queryComponentsFormData, queryFormData);
+  Object.assign(queryPartsFormData, queryFormData);
 
-// 重置表单
-function resetForm() {
-  formRef.value?.resetFields();
-  Object.assign(formData, {
-    id: undefined,
-    project_code: "",
-    wtcode: "",
-    code: "",
-    name: "",
-    parent_code: "",
-    count: 1,
-  });
-}
-
-onMounted(() => {
-  getProjectList();
-  handleQuery();
-});
-
-// 查询
-async function handleQuery() {
-  loading.value = true;
-  try {
-    const params = {
-      ...queryFormData,
-      page_no: pagination.page_no,
-      page_size: pagination.page_size,
-    };
-    const res = await ComponentsAPI.getList(params);
-    pageTableData.value = res.data.data.items;
-    total.value = res.data.data.total;
-  } finally {
-    loading.value = false;
-  }
-}
-
-// 重置查询
-function handleResetQuery() {
-  queryFormRef.value?.resetFields();
-  pagination.page_no = 1;
-  handleQuery();
-}
-
-// 表格选择
-function handleSelectionChange(selection: ComponentsData[]) {
-  selectIds.value = selection.map((item) => item.id);
-}
-
-// 行点击
-function handleRowClick(row: ComponentsData) {
-  console.log("Row clicked:", row);
-}
-
-// 新增
-function handleAdd() {
-  resetForm();
-  dialog.title = "新增部件";
-  dialog.visible = true;
-}
-
-// 编辑
-function handleEdit(row: ComponentsData) {
-  resetForm();
-  dialog.title = "编辑部件";
-  dialog.visible = true;
-  Object.assign(formData, {
-    id: row.id,
-    project_code: row.project_code,
-    wtcode: row.wtcode,
-    code: row.code,
-    name: row.name,
-    parent_code: row.parent_code,
-    count: row.count,
-  });
-}
-
-// 删除
-async function handleDelete(row: ComponentsData) {
-  try {
-    await ElMessageBox.confirm(`确认删除部件 "${row.name}" 吗？`, "提示", {
-      type: "warning",
-      confirmButtonText: "确定",
-      cancelButtonText: "取消",
-    });
-    await ComponentsAPI.delete([row.id]);
-    ElMessage.success("删除成功");
-    handleQuery();
-  } catch (error) {
-    // Cancelled or failed
-  }
-}
-
-// 批量删除
-async function handleBatchDelete() {
-  if (selectIds.value.length === 0) return;
-  try {
-    await ElMessageBox.confirm(`确认删除选中的 ${selectIds.value.length} 个部件吗？`, "提示", {
-      type: "warning",
-      confirmButtonText: "确定",
-      cancelButtonText: "取消",
-    });
-    await ComponentsAPI.delete(selectIds.value);
-    ElMessage.success("删除成功");
-    selectIds.value = [];
-    handleQuery();
-  } catch (error) {
-    // Cancelled or failed
-  }
-}
-
-// 提交表单
-async function submitForm() {
-  if (!formRef.value) return;
-  await formRef.value.validate(async (valid: boolean) => {
-    if (valid) {
-      try {
-        if (formData.id) {
-          await ComponentsAPI.update(formData.id, formData);
-          ElMessage.success("更新成功");
-        } else {
-          await ComponentsAPI.create(formData);
-          ElMessage.success("创建成功");
-        }
-        dialog.visible = false;
-        handleQuery();
-      } catch (error) {
-        // Error handled by request interceptor
-      }
+  // nextTick 确保在切换 DOM 后能拿到正确的实例
+  nextTick(() => {
+    if (isShow.value) {
+      componentsTableRef.value?.handleQuery();
+    } else {
+      partsTableRef.value?.handleQuery();
     }
   });
 }
-</script>
 
-<style scoped>
-.search-container {
-  margin-bottom: 20px;
+/**
+ * 重置查询条件
+ * 清空表单并重新触发查询
+ */
+function handleResetQuery() {
+  if (!queryFormRef.value) return;
+  queryFormRef.value.resetFields(); // 重置表单校验与数据
+  
+  // 清空 reactive 对象中的自定义字段
+  queryFormData.code = undefined;
+  queryFormData.spec = undefined;
+  queryFormData.material = undefined;
+
+  handleQuery();
 }
-.data-table {
-  margin-bottom: 20px;
+
+/** ----------------------------------------------------------------
+ * 4. 交互事件处理 (Event Handlers)
+ * ---------------------------------------------------------------- */
+
+/**
+ * 打开/关闭项目选择器
+ */
+const handleOpenProjectDrawer = () => {
+  projectDrawerVisible.value = !projectDrawerVisible.value;
+};
+
+/**
+ * 处理项目行点击事件
+ * @param code 从 ProjectTable 传回的项目编号
+ */
+function handleProjectRowClick(code: string) {
+  // 设置全局项目过滤条件
+  queryComponentsFormData.project_code = code;
+  queryPartsFormData.project_code = code;
+  
+  // 提示：通常选择项目后会自动关闭抽屉
+  projectDrawerVisible.value = false;
+  
+  // 执行查询
+  handleQuery();
 }
-.table-function {
-  margin-bottom: 10px;
+
+/**
+ * 处理组件表格行点击 (跳转逻辑)
+ * @param row 选中的组件行数据
+ */
+function handleComponentRowClick(row: ComponentsData) {
+  console.log("下钻到零件：", row.wtcode);
+  
+  // 1. 设置零件表的查询过滤条件（关联组件的万通码）
+  // 恢复使用 component_wtcode，并加上日志观察
+  console.log("Setting component_wtcode:", row.wtcode);
+  queryPartsFormData.component_wtcode = row.wtcode; 
+  queryPartsFormData.wtcode = undefined; 
+  
+  // 2. 切换显示模式到零件表
+  isShow.value = false;
+  
+  // 3. 异步触发零件表查询
+  nextTick(() => {
+    partsTableRef.value?.handleQuery();
+  });
 }
-.pagination-container {
-  margin-top: 15px;
-  display: flex;
-  justify-content: flex-end;
-}
-</style>
+
+</script>

@@ -18,15 +18,17 @@ class ComponentsService:
                 stmt = stmt.where(ComponentsModel.wtcode.ilike(f"%{search.wtcode}%"))
             if search.code:
                 stmt = stmt.where(ComponentsModel.code.ilike(f"%{search.code}%"))
-            if search.name:
-                stmt = stmt.where(ComponentsModel.name.ilike(f"%{search.name}%"))
+            if search.spec:
+                stmt = stmt.where(ComponentsModel.spec.ilike(f"%{search.spec}%"))
             
             # Total count
             count_stmt = select(func.count()).select_from(stmt.subquery())
             total = (await session.execute(count_stmt)).scalar() or 0
             
-            # Pagination
-            stmt = stmt.offset((page_no - 1) * page_size).limit(page_size)
+            # Pagination (如果 page_size 为 0 则返回全部)
+            if page_size > 0:
+                stmt = stmt.offset((page_no - 1) * page_size).limit(page_size)
+            
             stmt = stmt.order_by(ComponentsModel.created_time.desc())
             
             result = await session.execute(stmt)

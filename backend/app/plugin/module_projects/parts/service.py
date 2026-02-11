@@ -26,12 +26,15 @@ class PartsService:
             if search.code:
                 stmt = stmt.where(PartsModel.code.ilike(f"%{search.code}%"))
 
+            stmt = stmt.order_by(PartsModel.wtcode.asc())
             # 计算总数
             count_stmt = select(func.count()).select_from(stmt.subquery())
             total = (await session.execute(count_stmt)).scalar() or 0
 
-            # 分页
-            stmt = stmt.offset((page_no - 1) * page_size).limit(page_size)
+            # 分页 (如果 page_size 为 0 则返回全部)
+            if page_size > 0:
+                stmt = stmt.offset((page_no - 1) * page_size).limit(page_size)
+            
             stmt = stmt.order_by(PartsModel.created_time.desc())
             
             result = await session.execute(stmt)

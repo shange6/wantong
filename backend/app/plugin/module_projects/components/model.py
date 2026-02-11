@@ -21,7 +21,7 @@ class ComponentsModel(ModelMixin, UserMixin):
     )
     wtcode: Mapped[str] = mapped_column(String(64), unique=True, index=True, comment="万通码")
     code: Mapped[str] = mapped_column(String(64), comment="代号")
-    name: Mapped[str] = mapped_column(String(255), comment="名称")
+    spec: Mapped[str] = mapped_column(String(255), comment="规格")
     count: Mapped[int] = mapped_column(Integer, comment="数量")
     material:Mapped[str] = mapped_column(String(255), comment="材料")
     unit_mass: Mapped[float | None] = mapped_column(Float, comment="单重")

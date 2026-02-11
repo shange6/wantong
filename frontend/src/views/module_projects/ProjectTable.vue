@@ -24,6 +24,7 @@
             border
             stripe
             @selection-change="handleSelectionChange"
+            @row-click="handleRowClick"
         >
             <template #empty>
             <el-empty :image-size="80" description="暂无数据" />
@@ -57,7 +58,7 @@ import { ref, reactive, computed, onMounted } from 'vue';
 import ProjectAPI, { ProjectData, ProjectForm, ProjectQuery } from '@/api/module_projects/project';
 
 const props = defineProps<{ drawerVisible: boolean; }>();
-const emit = defineEmits(['update:drawerVisible']);
+const emit = defineEmits(['update:drawerVisible', 'row-click']);
 const visible = computed({
   get: () => props.drawerVisible,
   set: (val) => emit('update:drawerVisible', val),
@@ -78,12 +79,18 @@ function handleSelectionChange(selection: ProjectData[]) {
   selectIds.value = selection.map((item) => item.id);
 }
 
+// 表格点击
+function handleRowClick(row: ProjectData) {
+  visible.value = false;
+  emit('row-click', row.code);
+}
 
 const queryFormData = reactive<ProjectQuery>({
   code: undefined,
   name: undefined,
   no: undefined,
 });
+
 // 查询
 async function handleQuery() {
   loading.value = true;
@@ -100,7 +107,6 @@ async function handleQuery() {
     loading.value = false;
   }
 }
-
 
 // 初始化
 onMounted(() => {
