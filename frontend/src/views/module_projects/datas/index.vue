@@ -10,8 +10,8 @@
         label-suffix=":"
         @submit.prevent="handleQuery"
       >
-        <el-form-item prop="code" label="编号">
-          <el-input v-model="queryFormData.code" placeholder="请输入编号" clearable style="width: 100px"/>
+        <el-form-item prop="code" label="代号">
+          <el-input v-model="queryFormData.code" placeholder="请输入代号" clearable style="width: 100px"/>
         </el-form-item>
         <el-form-item prop="spec" label="名称">
           <el-input v-model="queryFormData.spec" placeholder="请输入名称" clearable style="width: 100px"/>
@@ -22,7 +22,7 @@
         <!-- 查询、重置、展开/收起按钮 -->
         <el-form-item class="search-buttons">
           <el-button
-            v-hasPerm="['module_system:menu:query']"
+            v-hasPerm="['module_projects:datas:query']"
             type="primary"
             icon="search"
             native-type="submit"
@@ -30,14 +30,14 @@
             查询
           </el-button>
           <el-button
-            v-hasPerm="['module_system:menu:query']"
+            v-hasPerm="['module_projects:datas:query']"
             icon="refresh"
             @click="handleResetQuery"
           >
             重置
           </el-button>
           <el-button
-            v-hasPerm="['module_system:menu:query']"
+            v-hasPerm="['module_projects:datas:query']"
             type="info"
             icon="refresh"
             @click="isShow = !isShow"
@@ -45,7 +45,7 @@
             切换
           </el-button>
           <el-button
-            v-hasPerm="['module_system:menu:create']"
+            v-hasPerm="['module_projects:datas:create']"
             type="success"
             icon="plus"
             @click="handleSaveToDB()"
@@ -53,7 +53,7 @@
             保存
           </el-button>
           <el-button
-            v-hasPerm="['module_system:menu:delete']"
+            v-hasPerm="['module_projects:datas:delete']"
             type="danger"
             icon="delete"
             :disabled="!tableSourceData?.data"
@@ -396,7 +396,7 @@ async function handleSaveToDB() {
 
     // 1. 获取扁平化后的数据
     const flatDetails = flattenTree(pageTableData.value);
-    console.log(flatDetails[0]);
+
     // 2. 组装后端要求的完整报文
     const payload = {
       // 这里的字段名（如 project_name）建议根据后端文档调整

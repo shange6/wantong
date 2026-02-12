@@ -1,115 +1,125 @@
-<!-- 部件列表 -->
 <template>
   <div class="app-container">
-    <!-- 搜索区域 -->
-    <div class="search-container">
-      <el-form
-        ref="queryFormRef"
-        :model="queryFormData"
-        :inline="true"
-        label-suffix=":"
-        @submit.prevent="handleQuery"
-      >
+    <SearchForm 
+      v-model:modelValue="queryFormData" 
+      :source-data="allTableData"
+      :show-no="false"
+      @update="handleFilterUpdate"
+      @reset="handleResetQuery"
+    >
+      <template #extra>
+        <el-button
+          v-hasPerm="['module_system:menu:query']"
+          type="info"
+          icon="arrow-right"
+          @click="handleOpenProjectDrawer"
+        >
+          项目
+        </el-button>
+      </template>
+    </SearchForm>
 
-        <el-form-item prop="code" label="代号">
-          <el-input v-model="queryFormData.code" placeholder="输入代号" clearable style="width: 100px"/>
-        </el-form-item>
-        <el-form-item prop="spec" label="规格">
-          <el-input v-model="queryFormData.spec" placeholder="输入规格" clearable style="width: 100px"/>
-        </el-form-item>
-        <el-form-item prop="material" label="材料/备注">
-          <el-input v-model="queryFormData.material" placeholder="输入材料/备注" clearable style="width: 100px"/>
-        </el-form-item>
-        <!-- 查询、重置、展开/收起按钮 -->
-        <el-form-item class="search-buttons">
-          <el-button
-            v-hasPerm="['module_projects:components:query']"
-            type="primary"
-            icon="search"
-            native-type="submit"
-          >
-            查询
-          </el-button>
-          <el-button
-            v-hasPerm="['module_projects:components:query']"
-            icon="refresh"
-            @click="handleResetQuery"
-          >
-            重置
-          </el-button>
-          <el-button
-            v-hasPerm="['module_system:menu:query']"
-            type="info"
-            icon="refresh"
-            @click="handleOpenProjectDrawer"
-          >
-            项目
-          </el-button>
-          <!-- 展开/收起 -->          
-        </el-form-item>
-      </el-form>
-    </div>
-    <!-- 内容区域 (封装为组件) -->
-    <ComponentsTable ref="tableRef" :query-params="queryFormData" />
-    <ProjectTable ref="projectTableRef" v-model:drawerVisible="projectDrawerVisible" @row-click="handleProjectRowClick"/>
+    <ComponentsTable 
+      ref="tableRef" 
+      :query-params="queryFormData"
+      @load-data="handleTableLoad" 
+    />
+
+    <ProjectTable 
+      ref="projectTableRef" 
+      v-model:drawerVisible="projectDrawerVisible" 
+      @row-click="handleProjectRowClick"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-
 import { ref, reactive, onMounted } from 'vue';
+import SearchForm from '../SearchForm.vue';
 import { ComponentsQuery } from '@/api/module_projects/components';
 import ComponentsTable from '../ComponentsTable.vue';
 import ProjectTable from '../ProjectTable.vue';
 
-const projectDrawerVisible = ref(false);
-
-// 新增：抽离点击事件，加日志
-const handleOpenProjectDrawer = () => {
-  console.log("点击了项目按钮，修改前：", projectDrawerVisible.value); // 日志1
-  projectDrawerVisible.value = !projectDrawerVisible.value;
-  console.log("点击了项目按钮，修改后：", projectDrawerVisible.value); // 日志2
-};
- 
 // 组件名称
 defineOptions({
-  name: "Components1",
+  name: "Components",
 });
 
-// 查询表单
-const queryFormRef = ref();
+const projectDrawerVisible = ref(false);
+const tableRef = ref();
+
+// --- 数据状态管理 ---
+// 存储从后端拿到的全量原始数据，作为 SearchForm 过滤的“底稿”
+const allTableData = ref<any[]>([]);
+
+// 查询表单数据
 const queryFormData = reactive<ComponentsQuery>({
   project_code: undefined,
-  // wtcode: undefined,
   code: undefined,
   spec: undefined,
   material: undefined,
   remark: undefined,
 });
 
-// 表格组件引用
-const tableRef = ref();
+/**
+ * 1. 响应 ComponentsTable 加载完成的事件
+ * 当表格从后端获取到原始数据时，存入 allTableData 供 SearchForm 使用
+ */
+function handleTableLoad(data: any[]) {
+  allTableData.value = data;
+}
 
-// 查询
-function handleQuery() {
+/**
+ * 2. 响应 SearchForm 的前端过滤结果
+ * 直接把过滤后的结果塞回表格组件的 pageTableData 中显示
+ */
+function handleFilterUpdate(filtered: any[]) {
+  if (tableRef.value) {
+    tableRef.value.pageTableData = filtered;
+  }
+}
+
+/**
+ * 初始进入页面自动加载
+ */
+onMounted(async () => {
+  // 1. 如果有特定的默认逻辑，可以在这里给 queryFormData.project_code 赋值
+  // 2. 触发 ComponentsTable 内部的 handleQuery 进行 API 请求
+  if (tableRef.value) {
+    await tableRef.value.handleQuery();
+  }
+});
+
+/**
+ * 3. 项目切换
+ * 项目变了，直接调用表格的 handleQuery 去后端拉取新项目的全量数据
+ */
+function handleProjectRowClick(code: string) {
+  queryFormData.project_code = code;
+  // 调用表格内部暴露的查询方法
   tableRef.value?.handleQuery();
 }
 
-// 项目表格行点击
-function handleProjectRowClick(code: string) {
-  queryFormData.project_code = code;
-  handleQuery();
-}
-
-// 重置查询
+/**
+ * 4. 重置查询
+ * 恢复显示全量原始数据
+ */
 function handleResetQuery() {
-  queryFormRef.value?.resetFields();
-
-  handleQuery();
+  if (tableRef.value) {
+    tableRef.value.pageTableData = allTableData.value;
+  }
 }
 
+const handleOpenProjectDrawer = () => {
+  projectDrawerVisible.value = !projectDrawerVisible.value;
+};
 </script>
 
 <style scoped>
-
+.app-container {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
 </style>

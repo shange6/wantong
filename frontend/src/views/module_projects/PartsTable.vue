@@ -127,7 +127,10 @@ const listToTree = (data: any[]) => {
 // 暴露查询方法
 defineExpose({
   handleQuery,
+  pageTableData,
+  listToTree
 });
+
 
 // 查询
 async function handleQuery() {  
@@ -140,11 +143,16 @@ async function handleQuery() {
       page_size: 0, // 0 表示不分页，获取全部数据
     };
     const res = await PartsAPI.getList(params);
-    const rawData = res.data.data.items;
-    console.log("PartsTable rawData:", rawData);
+    // 修正路径：增加对 res.data.data.items 的兼容
+    const rawData = res.data?.items || res.data?.data?.items || [];
+    const totalCount = res.data?.total || res.data?.data?.total || 0;
+    
+    // 1. 更新本地显示
     pageTableData.value = listToTree(rawData);
-    console.log("PartsTable treeData:", pageTableData.value);
-    total.value = res.data.data.total;
+    total.value = totalCount;
+
+    // 2. 关键：把拿到的原始全量数据抛给父组件，让 SearchForm 有“原材料”可以过滤
+    emit('load-data', rawData);
 
   } finally {
     loading.value = false;
@@ -158,7 +166,8 @@ function handleSelectionChange(selection: PartsData[]) {
 
 // 抛出事件
 const emit = defineEmits<{
-  (e: 'row-click', row: PartsData): void
+    (e: 'row-click', row: PartsData): void;
+    (e: 'load-data', data: PartsData[]): void; // 新增：数据加载完成后传给父组件
 }>();
 
 // 表格行点击

@@ -30,120 +30,93 @@
 </template>
 
 <script setup lang="ts">
-
-import { ref, reactive, onMounted, watch } from 'vue';
-import BaseCard  from './BaseCard.vue';
+import { ref, reactive, onMounted } from 'vue';
+import BaseCard from './BaseCard.vue';
 import ComponentsAPI, { ComponentsData, ComponentsForm, ComponentsQuery } from '@/api/module_projects/components';
 
-// 表格数据
-const loading = ref(false);             // 表格加载状态
-const pageTableData = ref<any[]>([]);   // 渲染在表格上的树形数据
-const total = ref(0);                   // 总条数
-const selectIds = ref<number[]>([]);    // 选中的行 ID 集合
-const selectedId = ref<number | undefined>(undefined);
-const dataTableRef = ref();             // BaseCard 的组件实例引用
-const pagination = reactive({           // 分页参数
-  page_no: 1,
-  page_size: 10,
+// 表格状态
+const loading = ref(false);
+const pageTableData = ref<any[]>([]); // 当前显示的树（可能是过滤后的）
+const total = ref(0);
+const selectIds = ref<number[]>([]);
+const dataTableRef = ref();
+const pagination = reactive({
+    page_no: 1,
+    page_size: 10,
 });
 
 const props = defineProps<{
-  queryParams?: ComponentsQuery;        // 查询参数
+    queryParams?: ComponentsQuery;
 }>();
 
-// 表单数据
-const formRef = ref();
-const formData = reactive<ComponentsForm>({
-  project_code: "",
-  parent_code: "",
-  wtcode: "",
-  code: "",
-  spec: "",
-  count: 0,
-  material: "",
-  unit_mass: 0,
-  total_mass: 0,
-  remark: "",
-});
+const emit = defineEmits<{
+    (e: 'row-click', row: ComponentsData): void;
+    (e: 'load-data', data: ComponentsData[]): void; // 新增：数据加载完成后传给父组件
+}>();
 
-// 重置表单
-function resetForm() {
-  formRef.value?.resetFields();
-  Object.assign(formData, {
-    id: undefined,
-    project_code: "",
-    parent_code: "",
-    wtcode: "",
-    code: "",
-    spec: "",
-    count: 0,
-    material: "",
-    unit_mass: 0,
-    total_mass: 0,
-    remark: "",
-  });
-}
 // 组件名称
 defineOptions({
-  name: "ComponentsTable",
+    name: "ComponentsTable",
 });
 
-// 组件挂载时查询
-onMounted(() => {
-  handleQuery();
-});
-
-// 暴露查询方法
+// 【关键修改点】
+// 暴露 pageTableData 让父组件可以直接修改它（实现前端过滤结果的注入）
 defineExpose({
-  handleQuery,
+    handleQuery,
+    pageTableData, 
+    loading
 });
 
-// 查询
-async function handleQuery() {  
+/**
+ * 查询方法：
+ * 在你的业务场景下，它负责从后端获取“原始全量数据”
+ */
+async function handleQuery() {
+    // 如果没有项目代码，不执行查询
+    // if (!props.queryParams?.project_code) return;
 
-  loading.value = true;
-  try {
-    const params = {
-      ...props.queryParams,
-      page_no: pagination.page_no,
-      page_size: pagination.page_size,
-    };
-    const res = await ComponentsAPI.getList(params);
-    pageTableData.value = res.data.data.items;
-    total.value = res.data.data.total;
+    loading.value = true;
+    try {
+        const params = {
+            ...props.queryParams,
+            // 如果要前端过滤，通常后端不分页，传一个很大的 page_size 或特定参数
+            page_no: pagination.page_no,
+            page_size: pagination.page_size, 
+        };
+        const res = await ComponentsAPI.getList(params);
+        // 修正路径：增加对 res.data.data.items 的兼容
+        const rawData = res.data?.items || res.data?.data?.items || [];
+        const totalCount = res.data?.total || res.data?.data?.total || 0;
+        
+        // 1. 更新本地显示
+        pageTableData.value = rawData;
+        total.value = totalCount;
 
-  } finally {
-    loading.value = false;
-  }
+        // 2. 关键：把拿到的原始全量数据抛给父组件，让 SearchForm 有“原材料”可以过滤
+        emit('load-data', rawData);
+
+    } finally {
+        loading.value = false;
+    }
 }
 
 // 表格选择
 function handleSelectionChange(selection: ComponentsData[]) {
-  selectIds.value = selection.map((item) => item.id);
+    selectIds.value = selection.map((item) => item.id);
 }
-
-// 抛出事件
-const emit = defineEmits<{
-  (e: 'row-click', row: ComponentsData): void
-}>();
 
 // 表格行点击
 function handleRowClick(row: ComponentsData) {
-  // 关键：将行数据传给父组件
-  emit('row-click', row);
+    emit('row-click', row);
 }
-
 
 </script>
 
 <style scoped>
-
 .components-table-container {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  /* margin-top: 0px; */
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
-
 </style>

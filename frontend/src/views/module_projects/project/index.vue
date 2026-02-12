@@ -10,8 +10,8 @@
         label-suffix=":"
         @submit.prevent="handleQuery"
       >
-        <el-form-item prop="code" label="编号">
-          <el-input v-model="queryFormData.code" placeholder="请输入编号" clearable style="width: 100px"/>
+        <el-form-item prop="code" label="代号">
+          <el-input v-model="queryFormData.code" placeholder="请输入代号" clearable style="width: 100px"/>
         </el-form-item>
         <el-form-item prop="name" label="名称">
           <el-input v-model="queryFormData.name" placeholder="请输入名称" clearable style="width: 100px"/>
@@ -60,7 +60,7 @@
           <el-empty :image-size="80" description="暂无数据" />
         </template>
         <el-table-column type="selection" fixed min-width="20" align="center" />
-        <el-table-column label="编号" prop="code" min-width="80" align="center" show-overflow-tooltip></el-table-column>
+        <el-table-column label="代号" prop="code" min-width="80" align="center" show-overflow-tooltip></el-table-column>
         <el-table-column label="名称"prop="name" min-width="200" show-overflow-tooltip></el-table-column>
         <el-table-column label="合同号" prop="no" min-width="80" align="center"></el-table-column>
       </el-table>
