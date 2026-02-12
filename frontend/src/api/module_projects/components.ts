@@ -46,7 +46,7 @@ export interface ComponentsData {
 export class ComponentsAPI {
   static getList(params: ComponentsQuery) {
     return request({
-      url: `${API_PATH}/list`, 
+      url: `${API_PATH}/list`,
       method: "get",
       params,
     });

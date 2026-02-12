@@ -11,16 +11,36 @@
         @submit.prevent="handleQuery"
       >
         <el-form-item prop="code" label="编号">
-          <el-input v-model="queryFormData.code" placeholder="请输入编号" clearable style="width: 80px"/>
+          <el-input
+            v-model="queryFormData.code"
+            placeholder="请输入编号"
+            clearable
+            style="width: 80px"
+          />
         </el-form-item>
         <el-form-item prop="spec" label="名称">
-          <el-input v-model="queryFormData.spec" placeholder="请输入名称" clearable style="width: 80px"/>
+          <el-input
+            v-model="queryFormData.spec"
+            placeholder="请输入名称"
+            clearable
+            style="width: 80px"
+          />
         </el-form-item>
         <el-form-item prop="material" label="材料">
-          <el-input v-model="queryFormData.material" placeholder="请输入材料" clearable style="width: 80px"/>
+          <el-input
+            v-model="queryFormData.material"
+            placeholder="请输入材料"
+            clearable
+            style="width: 80px"
+          />
         </el-form-item>
         <el-form-item prop="remark" label="备注">
-          <el-input v-model="queryFormData.remark" placeholder="请输入备注" clearable style="width: 80px"/>
+          <el-input
+            v-model="queryFormData.remark"
+            placeholder="请输入备注"
+            clearable
+            style="width: 80px"
+          />
         </el-form-item>
         <!-- 查询、重置、展开/收起按钮 -->
         <el-form-item class="search-buttons">
@@ -56,7 +76,7 @@
           >
             批量删除
           </el-button>
-          <!-- 展开/收起 -->          
+          <!-- 展开/收起 -->
         </el-form-item>
         <!-- 上传结果提示 -->
         <div v-if="uploadResult.projectName">
@@ -76,9 +96,7 @@
       <div class="data-table__toolbar">
         <div class="data-table__toolbar--left">
           <el-row :gutter="10">
-            <el-col :span="1.5">
-             
-            </el-col>
+            <el-col :span="1.5"></el-col>
             <el-col :span="1.5">
               <el-dropdown v-hasPerm="['module_system:menu:patch']" trigger="click">
                 <el-button type="default" :disabled="selectIds.length === 0" icon="ArrowDown">

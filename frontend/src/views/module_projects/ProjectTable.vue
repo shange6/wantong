@@ -11,32 +11,43 @@
       :close-on-press-escape="false"
       :show-close="true"
     >
-    <!-- 表格区域 -->
-        <el-card class="data-table">
+      <!-- 表格区域 -->
+      <el-card class="data-table">
         <!-- 功能区域 -->
         <!-- 表格区域 -->
         <el-table
-            ref="dataTableRef"
-            v-loading="loading"
-            :data="pageTableData"
-            :header-cell-style="{ textAlign: 'center' }"
-            class="data-table__content"
-            border
-            stripe
-            @selection-change="handleSelectionChange"
-            @row-click="handleRowClick"
+          ref="dataTableRef"
+          v-loading="loading"
+          :data="pageTableData"
+          :header-cell-style="{ textAlign: 'center' }"
+          class="data-table__content"
+          border
+          stripe
+          @selection-change="handleSelectionChange"
+          @row-click="handleRowClick"
         >
-            <template #empty>
+          <template #empty>
             <el-empty :image-size="80" description="暂无数据" />
-            </template>
-            <!-- <el-table-column type="selection" fixed min-width="20" align="center" /> -->
-            <el-table-column label="编号" prop="code" min-width="60" align="center" show-overflow-tooltip></el-table-column>
-            <el-table-column label="名称"prop="name" min-width="120" show-overflow-tooltip></el-table-column>
-            <el-table-column label="合同号" prop="no" min-width="40" align="center"></el-table-column>
+          </template>
+          <!-- <el-table-column type="selection" fixed min-width="20" align="center" /> -->
+          <el-table-column
+            label="编号"
+            prop="code"
+            min-width="60"
+            align="center"
+            show-overflow-tooltip
+          ></el-table-column>
+          <el-table-column
+            label="名称"
+            prop="name"
+            min-width="120"
+            show-overflow-tooltip
+          ></el-table-column>
+          <el-table-column label="合同号" prop="no" min-width="40" align="center"></el-table-column>
         </el-table>
         <!-- 分页区域 -->
         <div class="pagination-container">
-            <el-pagination
+          <el-pagination
             v-model:current-page="pagination.page_no"
             v-model:page-size="pagination.page_size"
             :total="total"
@@ -44,24 +55,22 @@
             layout="total, sizes, prev, pager, next, jumper"
             @size-change="handleQuery"
             @current-change="handleQuery"
-            />
+          />
         </div>
-        </el-card>
-
+      </el-card>
     </el-drawer>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref, reactive, computed, onMounted } from "vue";
+import ProjectAPI, { ProjectData, ProjectForm, ProjectQuery } from "@/api/module_projects/project";
 
-import { ref, reactive, computed, onMounted } from 'vue';
-import ProjectAPI, { ProjectData, ProjectForm, ProjectQuery } from '@/api/module_projects/project';
-
-const props = defineProps<{ drawerVisible: boolean; }>();
-const emit = defineEmits(['update:drawerVisible', 'row-click']);
+const props = defineProps<{ drawerVisible: boolean }>();
+const emit = defineEmits(["update:drawerVisible", "row-click"]);
 const visible = computed({
   get: () => props.drawerVisible,
-  set: (val) => emit('update:drawerVisible', val),
+  set: (val) => emit("update:drawerVisible", val),
 });
 
 // 表格数据
@@ -82,7 +91,7 @@ function handleSelectionChange(selection: ProjectData[]) {
 // 表格点击
 function handleRowClick(row: ProjectData) {
   visible.value = false;
-  emit('row-click', row.code);
+  emit("row-click", row.code);
 }
 
 const queryFormData = reactive<ProjectQuery>({
@@ -112,7 +121,6 @@ async function handleQuery() {
 onMounted(() => {
   handleQuery();
 });
-
 </script>
 
 <style>
@@ -126,7 +134,6 @@ onMounted(() => {
 </style>
 
 <style scoped>
-
 /* 让 el-card 撑满父容器 (抽屉body)，并内部也使用 Flex 布局 */
 .data-table {
   flex: 1;
@@ -153,5 +160,4 @@ onMounted(() => {
   margin-top: 10px;
   justify-content: flex-end;
 }
-
 </style>

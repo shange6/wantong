@@ -169,7 +169,7 @@
         </el-card>
       </el-col>
     </el-row>
-    <el-card class="info-card" ref="logCardRef">
+    <el-card ref="logCardRef" class="info-card">
       <div class="console-header">
         <span>系统运行日志</span>
         <el-button link type="primary" size="small" @click="clearLogs">清空日志</el-button>

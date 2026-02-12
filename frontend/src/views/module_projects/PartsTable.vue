@@ -1,53 +1,55 @@
 <template>
-    <div class="components-table-container">
-        <BaseCard
-            v-bind="$attrs"
-            ref="dataTableRef"
-            v-loading="loading"
-            row-key="wtcode"
-            :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
-            :data="pageTableData"
-            :header-cell-style="{ textAlign: 'center' }"
-            class="data-table__content"
-            border
-            stripe
-            height="100%"
-            @selection-change="handleSelectionChange"
-            @row-click="handleRowClick"
-        >
-        </BaseCard>
-    </div>
+  <div class="components-table-container">
+    <BaseCard
+      v-bind="$attrs"
+      ref="dataTableRef"
+      v-loading="loading"
+      row-key="wtcode"
+      :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
+      :data="pageTableData"
+      :header-cell-style="{ textAlign: 'center' }"
+      class="data-table__content"
+      border
+      stripe
+      height="100%"
+      @selection-change="handleSelectionChange"
+      @row-click="handleRowClick"
+    ></BaseCard>
+  </div>
 </template>
 
 <script setup lang="ts">
-
-import { ref, reactive, onMounted, watch } from 'vue';
-import BaseCard  from './BaseCard.vue';
-import PartsAPI, { PartsData, PartsForm, PartsQuery } from '@/api/module_projects/parts';
+import { ref, reactive, onMounted, watch } from "vue";
+import BaseCard from "./BaseCard.vue";
+import PartsAPI, { PartsData, PartsForm, PartsQuery } from "@/api/module_projects/parts";
 import { formatTree } from "@/utils/common";
 
-
 // 表格数据
-const loading = ref(false);             // 表格加载状态
-const pageTableData = ref<PartsData[]>([]);   // 渲染在表格上的树形数据
-const total = ref(0);                   // 总条数
-const selectIds = ref<number[]>([]);    // 选中的行 ID 集合
+const loading = ref(false); // 表格加载状态
+const pageTableData = ref<PartsData[]>([]); // 渲染在表格上的树形数据
+const total = ref(0); // 总条数
+const selectIds = ref<number[]>([]); // 选中的行 ID 集合
 const selectedId = ref<number | undefined>(undefined);
-const dataTableRef = ref();             // BaseCard 的组件实例引用
+const dataTableRef = ref(); // BaseCard 的组件实例引用
 
 const props = defineProps<{
-  queryParams?: PartsQuery;        // 查询参数
-  tableData?: PartsData[];         // 外部传入的数据
+  queryParams?: PartsQuery; // 查询参数
+  tableData?: PartsData[]; // 外部传入的数据
 }>();
 
 // 监听外部数据变化
-watch(() => props.tableData, (val) => {
-  if (val && val.length > 0) {
-    pageTableData.value = val;
-    total.value = val.length;
-    console.log("PartsTable received external data:", val);
-  }
-}, { immediate: true, deep: true });
+watch(
+  () => props.tableData,
+  (val) => {
+    // 移除 val.length > 0 的判断，允许空数组更新
+    if (val) {
+      pageTableData.value = val;
+      total.value = val.length;
+      console.log("PartsTable received external data:", val);
+    }
+  },
+  { immediate: true, deep: true }
+);
 
 // 表单数据
 const formRef = ref();
@@ -89,20 +91,20 @@ defineOptions({
 const listToTree = (data: any[]) => {
   const map: Record<string, any> = {};
   const roots: any[] = [];
-  
+
   // 按照 wtcode 排序，确保父节点在处理时容易找到（虽然 map 查找不依赖顺序，但排序是个好习惯）
   data.sort((a, b) => a.wtcode.length - b.wtcode.length || a.wtcode.localeCompare(b.wtcode));
 
-  data.forEach(item => {
+  data.forEach((item) => {
     // 初始化每个节点，添加 children 数组
     map[item.wtcode] = { ...item, children: [] };
   });
 
-  data.forEach(item => {
+  data.forEach((item) => {
     const node = map[item.wtcode];
     // 检查是否有上级。零件的 wtcode 格式通常是 'PROJECT.COMP.PART'
-    const lastDotIndex = item.wtcode.lastIndexOf('.');
-    
+    const lastDotIndex = item.wtcode.lastIndexOf(".");
+
     if (lastDotIndex > -1) {
       const parentWtcode = item.wtcode.substring(0, lastDotIndex);
       if (map[parentWtcode]) {
@@ -128,13 +130,11 @@ const listToTree = (data: any[]) => {
 defineExpose({
   handleQuery,
   pageTableData,
-  listToTree
+  listToTree,
 });
 
-
 // 查询
-async function handleQuery() {  
-
+async function handleQuery() {
   loading.value = true;
   try {
     const params = {
@@ -146,14 +146,13 @@ async function handleQuery() {
     // 修正路径：增加对 res.data.data.items 的兼容
     const rawData = res.data?.items || res.data?.data?.items || [];
     const totalCount = res.data?.total || res.data?.data?.total || 0;
-    
+
     // 1. 更新本地显示
     pageTableData.value = listToTree(rawData);
     total.value = totalCount;
 
     // 2. 关键：把拿到的原始全量数据抛给父组件，让 SearchForm 有“原材料”可以过滤
-    emit('load-data', rawData);
-
+    emit("load-data", rawData);
   } finally {
     loading.value = false;
   }
@@ -166,21 +165,18 @@ function handleSelectionChange(selection: PartsData[]) {
 
 // 抛出事件
 const emit = defineEmits<{
-    (e: 'row-click', row: PartsData): void;
-    (e: 'load-data', data: PartsData[]): void; // 新增：数据加载完成后传给父组件
+  (e: "row-click", row: PartsData): void;
+  (e: "load-data", data: PartsData[]): void; // 新增：数据加载完成后传给父组件
 }>();
 
 // 表格行点击
 function handleRowClick(row: PartsData) {
   // 关键：将行数据传给父组件
-  emit('row-click', row);
+  emit("row-click", row);
 }
-
-
 </script>
 
 <style scoped>
-
 .components-table-container {
   height: 100%;
   display: flex;
@@ -188,5 +184,4 @@ function handleRowClick(row: PartsData) {
   overflow: hidden;
   /* margin-top: 0px; */
 }
-
 </style>

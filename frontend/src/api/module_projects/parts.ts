@@ -48,7 +48,7 @@ export interface PartsData {
 export class PartsAPI {
   static getList(params: PartsQuery) {
     return request({
-      url: `${API_PATH}/list`, 
+      url: `${API_PATH}/list`,
       method: "get",
       params,
     });

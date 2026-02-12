@@ -38,16 +38,16 @@ export interface TableItemSchema {
 
 // 上传接口的后端内层data类型（匹配res.data.data）
 export interface UploadInnerData {
-  "文件个数": number;
-  "部件编号": string;
+  文件个数: number;
+  部件编号: string;
   data: TableItemSchema[]; // 这才是表格真正需要的数组数据
   info: string[];
-  "文件数量": number;
-  "项目名称": string;
-  "合同号": string;
-  "部件名称": string;
-  "数量": string;
-  "零件数量": number;
+  文件数量: number;
+  项目名称: string;
+  合同号: string;
+  部件名称: string;
+  数量: string;
+  零件数量: number;
 }
 
 // 上传接口的响应类型（最终匹配axios返回的res结构）
@@ -75,13 +75,11 @@ export const DataAPI = {
    */
   saveData(payload: any): Promise<ApiResponse> {
     return request({
-      url: `${API_PATH}/savedata`, 
-      method: 'post',
-      data: payload
+      url: `${API_PATH}/savedata`,
+      method: "post",
+      data: payload,
     });
-  }
+  },
 };
 
 export default DataAPI;
-
-

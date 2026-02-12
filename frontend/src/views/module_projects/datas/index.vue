@@ -2,70 +2,42 @@
 <template>
   <div class="app-container">
     <!-- 搜索区域 -->
-    <div class="search-container">
-      <el-form
-        ref="queryFormRef"
-        :model="queryFormData"
-        :inline="true"
-        label-suffix=":"
-        @submit.prevent="handleQuery"
-      >
-        <el-form-item prop="code" label="代号">
-          <el-input v-model="queryFormData.code" placeholder="请输入代号" clearable style="width: 100px"/>
-        </el-form-item>
-        <el-form-item prop="spec" label="名称">
-          <el-input v-model="queryFormData.spec" placeholder="请输入名称" clearable style="width: 100px"/>
-        </el-form-item>
-        <el-form-item prop="material" label="材料/备注">
-          <el-input v-model="queryFormData.material" placeholder="输入材料备注" clearable style="width: 110px"/>
-        </el-form-item>
-        <!-- 查询、重置、展开/收起按钮 -->
-        <el-form-item class="search-buttons">
-          <el-button
-            v-hasPerm="['module_projects:datas:query']"
-            type="primary"
-            icon="search"
-            native-type="submit"
-          >
-            查询
-          </el-button>
-          <el-button
-            v-hasPerm="['module_projects:datas:query']"
-            icon="refresh"
-            @click="handleResetQuery"
-          >
-            重置
-          </el-button>
-          <el-button
-            v-hasPerm="['module_projects:datas:query']"
-            type="info"
-            icon="refresh"
-            @click="isShow = !isShow"
-          >
-            切换
-          </el-button>
-          <el-button
-            v-hasPerm="['module_projects:datas:create']"
-            type="success"
-            icon="plus"
-            @click="handleSaveToDB()"
-          >
-            保存
-          </el-button>
-          <el-button
-            v-hasPerm="['module_projects:datas:delete']"
-            type="danger"
-            icon="delete"
-            :disabled="!tableSourceData?.data"
-            @click="handleDelete()"
-          >
-            放弃
-          </el-button>
-          <!-- 展开/收起 -->          
-        </el-form-item>
-        <!-- 上传结果提示 -->
-      </el-form>
-    </div>
+    <SearchForm 
+      v-model:modelValue="queryFormData" 
+      :source-data="tableSourceData?.data || []"
+      :show-no="false"
+      @update="handleUpdate"
+      @reset="handleResetQuery"
+    >
+      <template #extra>
+        <el-button
+          v-hasPerm="['module_projects:parts:query']"
+          type="warning"
+          icon="refresh"
+          @click="isShow=!isShow"
+        >
+          {{ isShow ? '切换零件' : '切换组件' }}
+        </el-button>
+        <el-button
+          v-hasPerm="['module_projects:datas:create']"
+          type="success"
+          icon="plus"
+          @click="handleSaveToDB()"
+        >
+          保存
+        </el-button>
+        <el-button
+          v-hasPerm="['module_projects:datas:delete']"
+          type="danger"
+          icon="delete"
+          :disabled="!tableSourceData?.data"
+          @click="handleDelete()"
+        >
+          放弃
+        </el-button>
+      </template>
+    </SearchForm>
+    
 
     <!-- 内容区域 -->     
     <PartsTable v-show="!isShow" :table-data="pageTableData" />
@@ -166,6 +138,7 @@ defineOptions({
   inheritAttrs: false,
 });
 
+import SearchForm from '../SearchForm.vue';
 import { useAppStore } from "@/store/modules/app.store";
 import { useUserStore } from "@/store/modules/user.store";
 import DatasAPI, { DatasPageQuery, UploadInnerData } from "@/api/module_projects/datas";
@@ -185,7 +158,7 @@ const uploadFileList = ref<any[]>([]);
 const uploading = ref(false);
 const currentPath = ref("/");
 const total = ref(0);
-const pageTableData = ref<PartsData[]>([]);
+const pageTableData = ref<PartsData[] | any[]>([]);
 // 1. 显式定义 tableSourceData，给它一个初始结构
 const tableSourceData = ref<UploadInnerData>();
 
@@ -195,6 +168,11 @@ const isShow = ref(true)
 // 根据文本内容返回对应的颜色类名或直接返回颜色值
 const getLogColor = (text: string) => {
   if (text.includes('错误')) {  return "var(--el-color-primary)"; }
+};
+
+// 更新表格数据
+const handleUpdate = (val: any[]) => {
+  pageTableData.value = val;
 };
 
 //  递归排序：同时处理当前层级及所有子节点的万通码排序
@@ -307,11 +285,17 @@ async function handleQuery() {
 
 // 重置查询
 async function handleResetQuery() {
-  queryFormRef.value?.resetFields();
-  dateRange.value = [];
+  // 1. 清空查询对象：使用 keyof 确保索引安全
+  (Object.keys(queryFormData) as (keyof typeof queryFormData)[]).forEach(key => {
+    queryFormData[key] = undefined;
+  });
+
+  // 2. 恢复全量数据
+  const sourceData = tableSourceData.value?.data || [];
+  pageTableData.value = [...sourceData];
   
-  // 触发查询（此时条件为空，即恢复全量数据）
-  handleQuery();
+  // 3. 排序（SearchForm 内部其实也有排序逻辑，这里保持一致即可）
+  sortTableTree(pageTableData.value);
 }
 
 // 行复选框选中项变化

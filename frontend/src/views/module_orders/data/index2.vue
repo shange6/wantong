@@ -11,35 +11,55 @@
         @submit.prevent="handleQuery"
       >
         <el-form-item prop="code" label="编号">
-          <el-input v-model="queryFormData.code" placeholder="请输入编号" clearable class="search-input" />
+          <el-input
+            v-model="queryFormData.code"
+            placeholder="请输入编号"
+            clearable
+            class="search-input"
+          />
         </el-form-item>
         <el-form-item prop="spec" label="名称">
-          <el-input v-model="queryFormData.spec" placeholder="请输入名称" clearable class="search-input" />
+          <el-input
+            v-model="queryFormData.spec"
+            placeholder="请输入名称"
+            clearable
+            class="search-input"
+          />
         </el-form-item>
         <el-form-item prop="material" label="材料">
-          <el-input v-model="queryFormData.material" placeholder="请输入材料" clearable class="search-input" />
+          <el-input
+            v-model="queryFormData.material"
+            placeholder="请输入材料"
+            clearable
+            class="search-input"
+          />
         </el-form-item>
         <el-form-item prop="remark" label="备注">
-          <el-input v-model="queryFormData.remark" placeholder="请输入备注" clearable class="search-input" />
+          <el-input
+            v-model="queryFormData.remark"
+            placeholder="请输入备注"
+            clearable
+            class="search-input"
+          />
         </el-form-item>
-          <!-- 查询、重置、展开/收起按钮 -->
-          <el-form-item class="search-buttons">
-            <el-button
-                v-hasPerm="['module_system:log:query']"
-                type="primary"
-                icon="search"
-                native-type="submit"
-            >
-                查询
-            </el-button>
-            <el-button
-                v-hasPerm="['module_system:log:query']"
-                icon="refresh"
-                @click="handleResetQuery"
-            >
-                重置
-            </el-button>
-          </el-form-item>
+        <!-- 查询、重置、展开/收起按钮 -->
+        <el-form-item class="search-buttons">
+          <el-button
+            v-hasPerm="['module_system:log:query']"
+            type="primary"
+            icon="search"
+            native-type="submit"
+          >
+            查询
+          </el-button>
+          <el-button
+            v-hasPerm="['module_system:log:query']"
+            icon="refresh"
+            @click="handleResetQuery"
+          >
+            重置
+          </el-button>
+        </el-form-item>
         <!-- 上传结果提示 -->
         <div v-if="uploadResult.projectName" class="info-group">
           <span class="info-item">项目名称：{{ uploadResult.projectName }}</span>
@@ -63,20 +83,56 @@
         class="data-table__content"
         border
         stripe
-        @selection-change="handleSelectionChange"
         :header-cell-style="{ textAlign: 'center' }"
+        @selection-change="handleSelectionChange"
       >
         <template #empty>
           <el-empty :image-size="80" description="暂无数据" />
         </template>
-        <el-table-column label="万通码" prop="wtcode" min-width="150" show-overflow-tooltip></el-table-column>
-        <el-table-column label="编号" prop="code" min-width="150" show-overflow-tooltip></el-table-column>
-        <el-table-column label="名称"prop="spec" min-width="150" show-overflow-tooltip></el-table-column>
+        <el-table-column
+          label="万通码"
+          prop="wtcode"
+          min-width="150"
+          show-overflow-tooltip
+        ></el-table-column>
+        <el-table-column
+          label="编号"
+          prop="code"
+          min-width="150"
+          show-overflow-tooltip
+        ></el-table-column>
+        <el-table-column
+          label="名称"
+          prop="spec"
+          min-width="150"
+          show-overflow-tooltip
+        ></el-table-column>
         <el-table-column label="数量" prop="count" align="center" min-width="45"></el-table-column>
-        <el-table-column label="材料" prop="material" align="center" min-width="100" show-overflow-tooltip></el-table-column>
-        <el-table-column label="单重" prop="unit_mass" align="center" min-width="60"></el-table-column>
-        <el-table-column label="总重" prop="total_mass" align="center" min-width="70"></el-table-column>
-        <el-table-column label="备注" prop="remark" min-width="120" show-overflow-tooltip></el-table-column>        
+        <el-table-column
+          label="材料"
+          prop="material"
+          align="center"
+          min-width="100"
+          show-overflow-tooltip
+        ></el-table-column>
+        <el-table-column
+          label="单重"
+          prop="unit_mass"
+          align="center"
+          min-width="60"
+        ></el-table-column>
+        <el-table-column
+          label="总重"
+          prop="total_mass"
+          align="center"
+          min-width="70"
+        ></el-table-column>
+        <el-table-column
+          label="备注"
+          prop="remark"
+          min-width="120"
+          show-overflow-tooltip
+        ></el-table-column>
         <el-table-column label="操作" min-width="80">
           <template #default="scope">
             <el-button
@@ -124,7 +180,8 @@
             <UploadFilled />
           </el-icon>
           <div class="el-upload__text">
-            拖拽文件到此处或 <em>点击上传</em>
+            拖拽文件到此处或
+            <em>点击上传</em>
           </div>
         </el-upload>
       </div>
@@ -133,7 +190,6 @@
 </template>
 
 <script setup lang="ts">
-
 defineOptions({
   name: "Data",
   inheritAttrs: false,
@@ -301,8 +357,7 @@ async function handleDelete(index: number) {
     pageTableData.value.splice(index, 1);
     total.value = pageTableData.value.length;
     ElMessage.success("已从临时列表中移除");
-  })
-
+  });
 }
 
 // 删除、批量删除
@@ -317,7 +372,7 @@ async function handleDelete(index: number) {
 //       ids.forEach(id => {
 //         // 1. 找到该 ID 在数组中的索引位置
 //         const index = pageTableData.value.findIndex(item => item.id === id);
-        
+
 //         // 2. 如果找到了，就从数组中真实删除这一行数据
 //         if (index !== -1) {
 //           pageTableData.value.splice(index, 1);
@@ -326,10 +381,10 @@ async function handleDelete(index: number) {
 
 //       // 3. 同步更新前端显示的总条数
 //       total.value = total.value - ids.length;
-      
+
 //       // 4. 清空选中状态
 //       selectIds.value = [];
-      
+
 //       ElMessage.success("前端数据已移除");
 //     })
 //     .catch(() => {
@@ -346,33 +401,33 @@ function handleExceed(files: any) {
   uploadRef.value!.clearFiles(); // 清除老文件
   const file = files[0];
   // 建议导入 genFileId，如果没有导入，可以用 Date.now() 保证唯一
-  file.uid = "upload_0129_"; 
-  uploadRef.value!.handleStart(file); // 放入队列  
+  file.uid = "upload_0129_";
+  uploadRef.value!.handleStart(file); // 放入队列
   // 关键：手动触发 http-request 逻辑
-  uploadRef.value!.submit(); 
+  uploadRef.value!.submit();
 }
 
 // 3. 真正的执行上传函数
 async function handleHttpRequest(options: any) {
   try {
-    uploading.value = true;    
+    uploading.value = true;
     // 1. 准备后端需要的 FormData
     const formData = new FormData();
     // 注意：'file' 必须和后端 FastAPI 定义的参数名一致
-    formData.append("file", options.file);    
+    formData.append("file", options.file);
     // 2. 路径处理（如果有的话）
     const targetPath = currentPath.value === "/" ? "" : currentPath.value;
     formData.append("target_path", targetPath);
     // 3. 调用你项目封装好的 API (这里会经过 axios 拦截器，自动带上 Token)
     const res = await DataAPI.uploadFile(formData);
     // 4. 直接取值（无任何判断，直接拿后端返回的表格数组）
-    const tableSourceData = res.data.data.data;  
+    const tableSourceData = res.data.data.data;
     // tableSourceData.forEach((item, index) => {
     //   console.log(item["code"]); // index从0开始，+1为自然行号
-    // }); 
-    
+    // });
+
     // 4. 数据处理：给每一行加唯一id（删除用）+ 部分字段转数字（优化显示）
-    const formatTableData = tableSourceData.map(item => ({
+    const formatTableData = tableSourceData.map((item) => ({
       ...item,
       id: Date.now() + Math.floor(Math.random() * 1000), // 生成唯一id
       count: item.count ? Number(item.count) : 0, // 字符串转数字
@@ -382,22 +437,20 @@ async function handleHttpRequest(options: any) {
 
     // 5. 将后端返回的提示信息绑定到 el-alert
     // const msg = res.data.data.项目名称 + res.data.data.合同号 + res.data.data.部件名称 + res.data.data.部件编号 + res.data.data.数量
-    const { 项目名称, 合同号, 部件名称, 部件编号, 数量, 文件个数 } = res.data?.data ?? {}
+    const { 项目名称, 合同号, 部件名称, 部件编号, 数量, 文件个数 } = res.data?.data ?? {};
     // const msg = `项目名称：${项目名称 ?? ''}     合同号：${合同号 ?? ''}    部件名称：${部件名称 ?? ''}    部件编号：${部件编号 ?? ''}    数量：${数量 ?? ''}`
     // uploadResult.message = msg;
-    uploadResult.projectName = 项目名称 ?? '';
-    uploadResult.contractNo = 合同号 ?? '';
-    uploadResult.partName = 部件名称 ?? '';
-    uploadResult.partCode = 部件编号 ?? '';
-    uploadResult.partCount = 数量 ?? '';
-    uploadResult.pageCount = String(文件个数) ?? '';
-    
+    uploadResult.projectName = 项目名称 ?? "";
+    uploadResult.contractNo = 合同号 ?? "";
+    uploadResult.partName = 部件名称 ?? "";
+    uploadResult.partCode = 部件编号 ?? "";
+    uploadResult.partCount = 数量 ?? "";
+    uploadResult.pageCount = String(文件个数) ?? "";
 
     // 6. 直接将后端数据添加到表格（前置追加，保持原有顺序）
     pageTableData.value = [...formatTableData, ...pageTableData.value];
     // 7. 更新表格总条数
     total.value = pageTableData.value.length;
-    
   } catch (error) {
     console.error("上传失败:", error);
   } finally {
@@ -405,7 +458,6 @@ async function handleHttpRequest(options: any) {
     uploading.value = false;
   }
 }
-
 </script>
 
 <style lang="scss" scoped>
@@ -421,7 +473,6 @@ async function handleHttpRequest(options: any) {
 }
 
 .data-table {
-
   /* 1. 确保 Card 容器本身是伸展的 */
   flex: 1;
   display: flex;
@@ -450,7 +501,7 @@ async function handleHttpRequest(options: any) {
   display: flex;
   flex-direction: column;
   height: 100%;
-  
+
   :deep(.el-card__body) {
     flex: 1;
     display: flex;
@@ -475,11 +526,11 @@ async function handleHttpRequest(options: any) {
 /* 调整上传虚框的样式 */
 :deep(.el-upload-dragger) {
   /* 1. 调整线宽 (border-width) */
-  border-width: 2px;   
+  border-width: 2px;
   /* 2. 调整线型 (dashed 是虚线，solid 是实线) */
-  border-style: dashed;   
+  border-style: dashed;
   /* 3. 调整颜色 (可以改成你喜欢的颜色) */
-  border-color: var(--el-color-primary);   
+  border-color: var(--el-color-primary);
   /* 4. 可选：调整悬停时的背景颜色 */
   &:hover {
     // border-color: var(--el-color-primary-light-8);
@@ -505,5 +556,4 @@ async function handleHttpRequest(options: any) {
   // color: var(--el-text-color-regular);
   // padding-left: 0px; /* Slight indent to align with alert text if needed, or just left align */
 }
-
 </style>

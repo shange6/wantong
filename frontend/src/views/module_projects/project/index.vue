@@ -11,13 +11,28 @@
         @submit.prevent="handleQuery"
       >
         <el-form-item prop="code" label="代号">
-          <el-input v-model="queryFormData.code" placeholder="请输入代号" clearable style="width: 100px"/>
+          <el-input
+            v-model="queryFormData.code"
+            placeholder="请输入代号"
+            clearable
+            style="width: 100px"
+          />
         </el-form-item>
         <el-form-item prop="name" label="名称">
-          <el-input v-model="queryFormData.name" placeholder="请输入名称" clearable style="width: 100px"/>
+          <el-input
+            v-model="queryFormData.name"
+            placeholder="请输入名称"
+            clearable
+            style="width: 100px"
+          />
         </el-form-item>
         <el-form-item prop="no" label="合同号">
-          <el-input v-model="queryFormData.no" placeholder="输入合同号" clearable style="width: 100px"/>
+          <el-input
+            v-model="queryFormData.no"
+            placeholder="输入合同号"
+            clearable
+            style="width: 100px"
+          />
         </el-form-item>
         <!-- 查询、重置、展开/收起按钮 -->
         <el-form-item class="search-buttons">
@@ -36,7 +51,7 @@
           >
             重置
           </el-button>
-          <!-- 展开/收起 -->          
+          <!-- 展开/收起 -->
         </el-form-item>
         <!-- 上传结果提示 -->
       </el-form>
@@ -60,11 +75,22 @@
           <el-empty :image-size="80" description="暂无数据" />
         </template>
         <el-table-column type="selection" fixed min-width="20" align="center" />
-        <el-table-column label="代号" prop="code" min-width="80" align="center" show-overflow-tooltip></el-table-column>
-        <el-table-column label="名称"prop="name" min-width="200" show-overflow-tooltip></el-table-column>
+        <el-table-column
+          label="代号"
+          prop="code"
+          min-width="80"
+          align="center"
+          show-overflow-tooltip
+        ></el-table-column>
+        <el-table-column
+          label="名称"
+          prop="name"
+          min-width="200"
+          show-overflow-tooltip
+        ></el-table-column>
         <el-table-column label="合同号" prop="no" min-width="80" align="center"></el-table-column>
       </el-table>
-      
+
       <!-- 分页区域 -->
       <div class="pagination-container">
         <el-pagination
@@ -77,16 +103,14 @@
           @current-change="handleQuery"
         />
       </div>
-      
     </el-card>
   </div>
 </template>
 
 <script setup lang="ts">
-
-import { ref, reactive, onMounted } from 'vue';
-import { ElMessage, ElMessageBox } from 'element-plus';
-import ProjectAPI, { ProjectData, ProjectForm, ProjectQuery } from '@/api/module_projects/project';
+import { ref, reactive, onMounted } from "vue";
+import { ElMessage, ElMessageBox } from "element-plus";
+import ProjectAPI, { ProjectData, ProjectForm, ProjectQuery } from "@/api/module_projects/project";
 
 defineOptions({
   name: "Project",
@@ -244,7 +268,6 @@ function resetForm() {
 </script>
 
 <style scoped>
-
 /* 让 el-card 撑满父容器 (抽屉body)，并内部也使用 Flex 布局 */
 .data-table {
   flex: 1;
@@ -271,5 +294,4 @@ function resetForm() {
   margin-top: 10px;
   justify-content: flex-end;
 }
-
 </style>

@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
-    <SearchForm 
-      v-model:modelValue="queryFormData" 
+    <SearchForm
+      v-model:model-value="queryFormData"
       :source-data="allTableData"
       :show-no="false"
       @update="handleFilterUpdate"
@@ -19,26 +19,22 @@
       </template>
     </SearchForm>
 
-    <ComponentsTable 
-      ref="tableRef" 
-      :query-params="queryFormData"
-      @load-data="handleTableLoad" 
-    />
+    <ComponentsTable ref="tableRef" :query-params="queryFormData" @load-data="handleTableLoad" />
 
-    <ProjectTable 
-      ref="projectTableRef" 
-      v-model:drawerVisible="projectDrawerVisible" 
+    <ProjectTable
+      ref="projectTableRef"
+      v-model:drawer-visible="projectDrawerVisible"
       @row-click="handleProjectRowClick"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
-import SearchForm from '../SearchForm.vue';
-import { ComponentsQuery } from '@/api/module_projects/components';
-import ComponentsTable from '../ComponentsTable.vue';
-import ProjectTable from '../ProjectTable.vue';
+import { ref, reactive, onMounted } from "vue";
+import SearchForm from "../SearchForm.vue";
+import { ComponentsQuery } from "@/api/module_projects/components";
+import ComponentsTable from "../ComponentsTable.vue";
+import ProjectTable from "../ProjectTable.vue";
 
 // 组件名称
 defineOptions({

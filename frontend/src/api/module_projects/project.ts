@@ -29,7 +29,7 @@ export interface ProjectData {
 class ProjectAPI {
   static getList(params: ProjectQuery) {
     return request({
-      url: `${API_PATH}/list`, 
+      url: `${API_PATH}/list`,
       method: "get",
       params,
     });
