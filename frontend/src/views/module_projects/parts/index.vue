@@ -99,7 +99,13 @@ function handleComponentsLoad(data: any[]) {
 }
 
 function handlePartsLoad(data: any[]) {
-  allPartsData.value = data;
+  // allPartsData.value = data;
+  if (partsTableRef.value) {
+    allPartsData.value = partsTableRef.value.listToTree(data);
+  } else {
+    // Fallback，虽然理论上 ref 应该存在
+    allPartsData.value = data; 
+  }
 }
 
 /** ----------------------------------------------------------------
@@ -112,9 +118,8 @@ function handleFilterUpdate(filtered: any[]) {
     // 过滤组件表：SearchForm 已经处理好了树形结构
     componentsTableRef.value.pageTableData = filtered;
   } else if (!isShow.value && partsTableRef.value) {
-    // 过滤零件表：需要注意 PartsTable 内部使用了 listToTree
-    // SearchForm 返回的是过滤后的扁平数组，需要重新转树
-    partsTableRef.value.pageTableData = partsTableRef.value.listToTree(filtered);
+    // 过滤零件表：此时 filtered 已经是树形结构
+    partsTableRef.value.pageTableData = filtered;
   }
 }
 

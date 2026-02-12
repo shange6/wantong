@@ -48,7 +48,10 @@ watch(
       console.log("PartsTable received external data:", val);
     }
   },
-  { immediate: true, deep: true }
+  { 
+    immediate: true, 
+    deep: true 
+  }
 );
 
 // 表单数据

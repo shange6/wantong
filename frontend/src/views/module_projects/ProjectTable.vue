@@ -7,8 +7,8 @@
       size="50%"
       append-to-body
       class="project-table-drawer"
-      :close-on-click-modal="false"
-      :close-on-press-escape="false"
+      :close-on-click-modal="true"
+      :close-on-press-escape="true"
       :show-close="true"
     >
       <!-- 表格区域 -->
@@ -158,6 +158,7 @@ onMounted(() => {
 
 .pagination-container {
   margin-top: 10px;
-  justify-content: flex-end;
+  /* display: flex;
+  justify-content: flex-end; */
 }
 </style>

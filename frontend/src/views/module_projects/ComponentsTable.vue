@@ -40,7 +40,7 @@ import ComponentsAPI, {
 
 // 表格状态
 const loading = ref(false);
-const pageTableData = ref<any[]>([]); // 当前显示的树（可能是过滤后的）
+const pageTableData = ref<ComponentsData[]>([]); // 当前显示的树（可能是过滤后的）
 const total = ref(0);
 const selectIds = ref<number[]>([]);
 const dataTableRef = ref();
@@ -97,7 +97,7 @@ async function handleQuery() {
     total.value = totalCount;
 
     // 2. 关键：把拿到的原始全量数据抛给父组件，让 SearchForm 有“原材料”可以过滤
-    emit("load-data", rawData);
+    emit("load-data", rawData as ComponentsData[]);
   } finally {
     loading.value = false;
   }
