@@ -1,47 +1,67 @@
 <template>
-  <!-- 表格区域 -->
-  <el-table v-bind="$attrs">
-    <template #empty>
-      <el-empty :image-size="80" description="暂无数据" />
-    </template>
-    <el-table-column type="selection" fixed min-width="30" align="center" />
-    <el-table-column label="万通码" prop="wtcode" min-width="100" show-overflow-tooltip>
-      <template #default="{ row }">
-        {{ row.wtcode?.includes(".") ? row.wtcode.slice(row.wtcode.indexOf(".") + 1) : row.wtcode }}
+  <div class="base-table-wrapper">
+    <el-table
+      v-bind="filterTableAttrs"
+      class="base-table-content"
+      border
+      height="100%"
+      :header-cell-style="{ textAlign: 'center', backgroundColor: 'var(--el-fill-color-light)' }"
+    >
+      <template #empty>
+        <el-empty :image-size="80" description="暂无数据" />
       </template>
-    </el-table-column>
-    <el-table-column
-      label="代号"
-      prop="code"
-      min-width="130"
-      show-overflow-tooltip
-    ></el-table-column>
-    <el-table-column
-      label="名称"
-      prop="spec"
-      min-width="130"
-      show-overflow-tooltip
-    ></el-table-column>
-    <el-table-column label="数量" prop="count" align="center" min-width="40"></el-table-column>
-    <el-table-column
-      label="材料"
-      prop="material"
-      min-width="130"
-      show-overflow-tooltip
-    ></el-table-column>
-    <el-table-column label="单重" prop="unit_mass" align="center" min-width="60"></el-table-column>
-    <el-table-column label="总重" prop="total_mass" align="center" min-width="70"></el-table-column>
-    <el-table-column
-      label="备注"
-      prop="remark"
-      min-width="100"
-      show-overflow-tooltip
-    ></el-table-column>
-  </el-table>
+      <slot name="append-columns"></slot>
+    </el-table>
+  </div>
 </template>
 
 <script setup lang="ts">
-// 无需额外脚本，attrs 自动透传
+
+defineOptions({
+  name: "BaseTable",
+  inheritAttrs: false, // 禁止属性自动挂载到根 div 上
+});
+
+const attrs = useAttrs();
+const filterTableAttrs = computed(() => filterElTableAttrs(attrs));
+
+/**
+ * 严格过滤函数：只允许 ElTable 支持的属性和事件通过
+ * @param attrs 原始属性对象
+ * @returns 过滤后的合法 ElTable 属性对象
+ */
+function filterElTableAttrs(attrs: Record<string, any>): Record<string, any> {
+  // Element Plus el-table 官方属性白名单
+  const elTablePropKeys = [
+    'data', 'size', 'width', 'height', 'max-height', 'fit', 'stripe', 
+    'border', 'row-key', 'context', 'show-header', 'show-summary', 
+    'sum-text', 'summary-method', 'row-class-name', 'row-style', 
+    'cell-class-name', 'cell-style', 'header-row-class-name', 
+    'header-row-style', 'header-cell-class-name', 'tree-props',
+    'default-expand-all', 'expand-row-keys', 'default-sort', 'tooltip-effect',
+    'select-on-indeterminante', 'indent', 'lazy', 'load', 'scrollbar-always-on'
+  ];
+
+  return Object.keys(attrs).reduce((acc, key) => {
+    // 逻辑：如果在白名单内，或者是以 'on' 开头的事件监听器，则保留
+    if (elTablePropKeys.includes(key) || key.startsWith('on')) {
+      acc[key] = attrs[key];
+    }
+    return acc;
+  }, {} as Record<string, any>);
+}
+
 </script>
 
-<style scoped></style>
+<style scoped>
+
+.base-table-wrapper {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  overflow: hidden;
+  flex-direction: column;
+}
+
+</style>

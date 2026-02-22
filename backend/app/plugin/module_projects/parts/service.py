@@ -9,8 +9,8 @@ class PartsService:
     @classmethod
     async def get_parts_list_service(
         cls,
-        page_no: int,
-        page_size: int,
+        # page_no: int,
+        # page_size: int,
         search: PartsFilter
     ) -> dict:
         """
@@ -32,8 +32,8 @@ class PartsService:
             total = (await session.execute(count_stmt)).scalar() or 0
 
             # 分页 (如果 page_size 为 0 则返回全部)
-            if page_size > 0:
-                stmt = stmt.offset((page_no - 1) * page_size).limit(page_size)
+            # if page_size > 0:
+            #     stmt = stmt.offset((page_no - 1) * page_size).limit(page_size)
             
             stmt = stmt.order_by(PartsModel.created_time.desc())
             
@@ -46,8 +46,8 @@ class PartsService:
             return {
                 "items": data_list,
                 "total": total,
-                "page_no": page_no,
-                "page_size": page_size
+                # "page_no": page_no,
+                # "page_size": page_size
             }
 
     @classmethod

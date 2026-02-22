@@ -2,7 +2,7 @@ from typing import Optional
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict
 
-class ProjectBase(BaseModel):
+class ProjectsBase(BaseModel):
     """
     项目基础模型
     """
@@ -10,13 +10,13 @@ class ProjectBase(BaseModel):
     name: str
     no: str
 
-class ProjectCreate(ProjectBase):
+class ProjectsCreate(ProjectsBase):
     """
     创建项目
     """
     pass
 
-class ProjectUpdate(BaseModel):
+class ProjectsUpdate(BaseModel):
     """
     更新项目
     """
@@ -24,7 +24,7 @@ class ProjectUpdate(BaseModel):
     name: Optional[str] = None
     no: Optional[str] = None
 
-class ProjectFilter(BaseModel):
+class ProjectsFilter(BaseModel):
     """
     项目查询参数
     """
@@ -34,7 +34,7 @@ class ProjectFilter(BaseModel):
     
     model_config = ConfigDict(extra="ignore")
 
-class ProjectOut(ProjectBase):
+class ProjectsOut(ProjectsBase):
     """
     项目输出模型
     """

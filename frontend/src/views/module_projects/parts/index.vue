@@ -1,191 +1,148 @@
 <template>
   <div class="app-container">
     <SearchForm
-      v-model:model-value="queryFormData"
-      :source-data="isShow ? allComponentsData : allPartsData"
+      v-model="queryFormData"
+      :source-data="allComponentsData"
       :show-no="false"
-      @update="handleFilterUpdate"
+      @update="handleComponentsFilter"
       @reset="handleResetQuery"
-    >
+    >      
       <template #extra>
         <el-button
-          v-hasPerm="['module_projects:parts:query']"
+          v-hasPerm="['module_system:menu:query']"
           type="info"
-          icon="arrow-right"
           @click="handleOpenProjectDrawer"
         >
-          项目
+          📂 项目
         </el-button>
         <el-button
           v-hasPerm="['module_projects:parts:query']"
           type="warning"
-          icon="refresh"
           @click="toggleTable"
         >
-          {{ isShow ? "切换零件" : "切换组件" }}
+          {{ partsTableVisible ? "切换组件" : "切换零件" }}
         </el-button>
       </template>
     </SearchForm>
 
-    <ComponentsTable
-      v-show="isShow"
-      ref="componentsTableRef"
-      :query-params="queryComponentsFormData"
-      @load-data="handleComponentsLoad"
-      @row-click="handleComponentRowClick"
-    />
-
     <PartsTable
-      v-show="!isShow"
+      v-show="partsTableVisible"
       ref="partsTableRef"
-      :query-params="queryPartsFormData"
-      @load-data="handlePartsLoad"
+      :currentPage="paginationParts.currentPage"
+      :pageSize="paginationParts.pageSize"
+      @update:currentPage="(val) => paginationParts.currentPage = val"
+      @update:pageSize="(val) => paginationParts.pageSize = val"
     />
 
-    <ProjectTable
-      ref="projectTableRef"
-      v-model:drawer-visible="projectDrawerVisible"
+    <ComponentsTable
+      v-show="!partsTableVisible"
+      ref="componentsTableRef"
+      @row-click="handleComponentRowClick"
+      :currentPage="paginationComponents.currentPage"
+      :pageSize="paginationComponents.pageSize"
+      @update:currentPage="(val) => paginationComponents.currentPage = val"
+      @update:pageSize="(val) => paginationComponents.pageSize = val"
+    />
+
+    <ProjectsDrawerTable
+      :drawerVisible="projectDrawerVisible"
+      @update:drawerVisible="(val) => projectDrawerVisible = val"
       @row-click="handleProjectRowClick"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, nextTick } from "vue";
+import { ref, reactive, computed } from "vue";
 import SearchForm from "../SearchForm.vue";
-import { ComponentsQuery, ComponentsData } from "@/api/module_projects/components";
-import { PartsQuery } from "@/api/module_projects/parts";
-import ComponentsTable from "../ComponentsTable.vue";
 import PartsTable from "../PartsTable.vue";
-import ProjectTable from "../ProjectTable.vue";
+import ComponentsTable from "../ComponentsTable.vue";
+import ProjectsDrawerTable from "../ProjectsDrawerTable.vue";
 
-defineOptions({
-  name: "Parts",
-});
+defineOptions({ name: "ProjectsIndex" });
 
-/** ----------------------------------------------------------------
- * 1. 响应式变量与状态
- * ---------------------------------------------------------------- */
-const isShow = ref(true); // true: 组件表, false: 零件表
-const projectDrawerVisible = ref(false);
+// --- 1. 引用定义 (Refs) ---
 const componentsTableRef = ref();
 const partsTableRef = ref();
+const partsTableVisible = ref(false)
+const projectDrawerVisible = ref(false);
 
-// 原始全量数据底稿 (SearchForm 需要用到)
+// --- 2. 状态管理 (State) ---
+const selectedComponent = ref<any>(null);
+
+// 组件表状态
 const allComponentsData = ref<any[]>([]);
-const allPartsData = ref<any[]>([]);
+const filteredComponentsData = ref<any[] | null>(null);
+const paginationComponents = reactive({ currentPage: 1, pageSize: 10 });
 
-// 统一搜索表单数据
-const queryFormData = reactive({
+// 零件表状态
+const allPartsData = ref<any[]>([]);
+const filteredPartsData = ref<any[] | null>(null);
+const paginationParts = reactive({ currentPage: 1, pageSize: 10 });
+
+// 查询参数
+const queryFormData = ref({
+  project_code: undefined,
   code: undefined,
   spec: undefined,
   material: undefined,
+  remark: undefined,
 });
 
-const queryComponentsFormData = reactive<ComponentsQuery>({
-  project_code: undefined,
+// --- 3. 数据展示逻辑 (Computed) ---
+const componentsData = computed(() => {
+  return filteredComponentsData.value !== null ? filteredComponentsData.value : allComponentsData.value;
 });
 
-const queryPartsFormData = reactive<PartsQuery>({
-  project_code: undefined,
-  component_wtcode: undefined,
+const partsData = computed(() => {
+  return filteredPartsData.value !== null ? filteredPartsData.value : allPartsData.value;
 });
 
-/** ----------------------------------------------------------------
- * 2. 数据加载回调 (从子组件获取全量数据)
- * ---------------------------------------------------------------- */
-function handleComponentsLoad(data: any[]) {
-  allComponentsData.value = data;
+// 搜索过滤
+function handleComponentsFilter(filtered: any[]) {
+  filteredComponentsData.value = filtered;
+  paginationComponents.currentPage = 1;
 }
 
-function handlePartsLoad(data: any[]) {
-  // allPartsData.value = data;
-  if (partsTableRef.value) {
-    allPartsData.value = partsTableRef.value.listToTree(data);
-  } else {
-    // Fallback，虽然理论上 ref 应该存在
-    allPartsData.value = data; 
-  }
+// 行点击联动逻辑 🔗
+function handleComponentRowClick(row: any) {
+  selectedComponent.value = row;
+  // 核心：调用 PartsTable 暴露的方法请求新数据
+  partsTableRef.value?.handleQuery({
+    component_wtcode: row.wtcode 
+  });
+  partsTableVisible.value = true
 }
 
-/** ----------------------------------------------------------------
- * 3. 核心业务逻辑 (前端过滤与查询)
- * ---------------------------------------------------------------- */
-
-// 响应 SearchForm 的前端过滤结果
-function handleFilterUpdate(filtered: any[]) {
-  if (isShow.value && componentsTableRef.value) {
-    // 过滤组件表：SearchForm 已经处理好了树形结构
-    componentsTableRef.value.pageTableData = filtered;
-  } else if (!isShow.value && partsTableRef.value) {
-    // 过滤零件表：此时 filtered 已经是树形结构
-    partsTableRef.value.pageTableData = filtered;
-  }
+function handleProjectRowClick(row: any) {
+  queryFormData.value.project_code = row.code;
+  componentsTableRef.value?.handleQuery?.();
+  partsTableVisible.value = false
 }
 
-// 切换表格展示
-function toggleTable() {
-  isShow.value = !isShow.value;
-  // 切换后执行一次重置式查询，确保新表有数据
-  handleResetQuery();
-}
-
-// 初始加载
-onMounted(async () => {
-  await nextTick();
-  // 默认加载组件表数据
-  componentsTableRef.value?.handleQuery();
-});
-
-/** ----------------------------------------------------------------
- * 4. 交互处理
- * ---------------------------------------------------------------- */
+const handleResetQuery = () => {
+  filteredComponentsData.value = null;
+  paginationComponents.currentPage = 1;
+};
 
 const handleOpenProjectDrawer = () => {
   projectDrawerVisible.value = !projectDrawerVisible.value;
 };
 
-// 项目点击：触发后端真实请求
-function handleProjectRowClick(code: string) {
-  queryComponentsFormData.project_code = code;
-  queryPartsFormData.project_code = code;
-  projectDrawerVisible.value = false;
-
-  // 重新从后端拉取新项目的全量数据
-  if (isShow.value) {
-    componentsTableRef.value?.handleQuery();
-  } else {
-    partsTableRef.value?.handleQuery();
-  }
+// 切换表格展示
+function toggleTable() {
+  partsTableVisible.value = !partsTableVisible.value;
+  // 切换后执行一次重置式查询，确保新表有数据
+  // handleResetQuery();
 }
 
-// 重置查询
-function handleResetQuery() {
-  // 恢复显示对应的全量底稿
-  if (isShow.value && componentsTableRef.value) {
-    componentsTableRef.value.pageTableData = allComponentsData.value;
-  } else if (!isShow.value && partsTableRef.value) {
-    partsTableRef.value.pageTableData = allPartsData.value;
-  }
-}
-
-// 下钻逻辑：从组件表点击进入零件表
-function handleComponentRowClick(row: ComponentsData) {
-  queryPartsFormData.component_wtcode = row.wtcode;
-  isShow.value = false;
-
-  // 下钻涉及到数据范围变化，通常需要重新请求后端该组件下的零件
-  nextTick(() => {
-    partsTableRef.value?.handleQuery();
-  });
-}
 </script>
 
 <style scoped>
 .app-container {
-  padding: 20px;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  height: 100%;
+  overflow: hidden;
 }
 </style>

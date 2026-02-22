@@ -1,23 +1,21 @@
 import request from "@/utils/request";
 
-const API_PATH = "/projects/project";
+const API_PATH = "/projects/projects";
 
-export interface ProjectQuery {
-  page_no?: number;
-  page_size?: number;
+export interface ProjectsQuery {
   code?: string;
   name?: string;
   no?: string;
 }
 
-export interface ProjectForm {
+export interface ProjectsForm {
   id?: number;
   code: string;
   name: string;
   no: string;
 }
 
-export interface ProjectData {
+export interface ProjectsData {
   id: number;
   code: string;
   name: string;
@@ -26,8 +24,8 @@ export interface ProjectData {
   updated_time: string;
 }
 
-class ProjectAPI {
-  static getList(params: ProjectQuery) {
+class ProjectsAPI {
+  static getList(params: ProjectsQuery) {
     return request({
       url: `${API_PATH}/list`,
       method: "get",
@@ -35,7 +33,7 @@ class ProjectAPI {
     });
   }
 
-  static create(data: ProjectForm) {
+  static create(data: ProjectsForm) {
     return request({
       url: `${API_PATH}/create`,
       method: "post",
@@ -43,7 +41,7 @@ class ProjectAPI {
     });
   }
 
-  static update(id: number, data: Partial<ProjectForm>) {
+  static update(id: number, data: Partial<ProjectsForm>) {
     return request({
       url: `${API_PATH}/update/${id}`,
       method: "put",
@@ -60,4 +58,4 @@ class ProjectAPI {
   }
 }
 
-export default ProjectAPI;
+export default ProjectsAPI;

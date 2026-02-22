@@ -6,41 +6,27 @@
       :show-material="false"
       @update="handleFilterUpdate"
       @reset="handleResetQuery"
-    >      
-      <template #extra>
-        <el-button
-          v-hasPerm="['module_system:menu:query']"
-          type="info"
-          @click="handleOpenProjectDrawer"
-        >
-          📂 项目
-        </el-button>
-      </template>
-    </SearchForm>
+    />
 
-    <ComponentsTable
+    <ProjectsTable
       ref="projectTableRef"
       :data="displayData"
       :currentPage="pagination.currentPage"
       :pageSize="pagination.pageSize"
+      v-model:drawer-visible="projectDrawerVisible"
+      @row-click="handleProjectRowClick"
       @load-data="handleTableLoad" 
       @update:currentPage="(val) => pagination.currentPage = val"
       @update:pageSize="(val) => pagination.pageSize = val"
-    />
-
-    <ProjectsDrawerTable
-      :drawerVisible="projectDrawerVisible"
-      @update:drawerVisible="(val) => projectDrawerVisible = val"
-      @row-click="handleProjectRowClick"
     />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from "vue";
+
 import SearchForm from "../SearchForm.vue";
-import ComponentsTable from "../ComponentsTable.vue";
-import ProjectsDrawerTable from "../ProjectsDrawerTable.vue";
+import ProjectsTable from "../ProjectsTable.vue";
 
 defineOptions({
   name: "ProjectsIndex",
@@ -110,17 +96,13 @@ function handleProjectRowClick(row: any) {
   projectTableRef.value?.handleQuery?.();
 }
 
-const handleOpenProjectDrawer = () => {
-  projectDrawerVisible.value = !projectDrawerVisible.value;
-};
 
 </script>
 
 <style scoped>
-
 .app-container {
   /* 确保占满屏幕且不产生双滚动条 */
-  /* height: 100vh; */
+  height: 100vh;
   height: 100%;
   display: flex;
   flex-direction: column;

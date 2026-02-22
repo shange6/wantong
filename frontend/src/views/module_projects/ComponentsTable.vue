@@ -1,124 +1,113 @@
 <template>
-  <div class="components-table-container">
-    <BaseCard
-      ref="dataTableRef"
-      v-loading="loading"
-      row-key="wtcode"
-      :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
-      :data="pageTableData"
-      :header-cell-style="{ textAlign: 'center' }"
-      class="data-table__content"
-      border
-      stripe
-      height="100%"
-      @selection-change="handleSelectionChange"
-      @row-click="handleRowClick"
+  <div class="components-table" v-loading="loading">
+    <MiddleTable 
+      v-bind="$attrs" 
+      :data="displayData" 
+      :current-page="currentPage"
+      :page-size="pageSize"
+      @update:current-page="handlePageUpdate"
+      @update:page-size="handleSizeUpdate"
     >
-      <template #pagination-area>
-        <el-pagination
-          v-model:current-page="pagination.page_no"
-          v-model:page-size="pagination.page_size"
-          :total="total"
-          :page-sizes="[10, 20, 50, 100]"
-          layout="total, sizes, prev, pager, next, jumper"
-          @size-change="handleQuery"
-          @current-change="handleQuery"
-        />
+      <template #append-columns="{ formatWtCode }">
+        <el-table-column type="selection" fixed min-width="20" align="center" />        
+        <el-table-column label="万通码" prop="wtcode" min-width="100" show-overflow-tooltip>
+          <template #default="{ row }">
+            <span class="wtcode-text">{{ formatWtCode(row.wtcode) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="代号" prop="code" min-width="110" show-overflow-tooltip />
+        <el-table-column label="名称" prop="spec" min-width="100" show-overflow-tooltip />
+        <el-table-column label="数量" prop="count" min-width="40" align="center" />
+        <el-table-column label="材料" prop="material" min-width="120" show-overflow-tooltip align="center" />
+        <el-table-column label="单重" prop="unit_mass" min-width="60" align="center" />
+        <el-table-column label="总重" prop="total_mass" min-width="70" align="center" />
+        <el-table-column label="备注" prop="remark" min-width="80" show-overflow-tooltip />
+        <slot name="operation-column"></slot>
       </template>
-    </BaseCard>
+    </MiddleTable>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from "vue";
-import BaseCard from "./BaseCard.vue";
-import ComponentsAPI, {
-  ComponentsData,
-  ComponentsForm,
-  ComponentsQuery,
-} from "@/api/module_projects/components";
+import { ref, computed, onMounted } from "vue";
+import MiddleTable from "./MiddleTable.vue";
+import ComponentsAPI, { type ComponentsData, type ComponentsQuery } from "@/api/module_projects/components";
 
-// 表格状态
-const loading = ref(false);
-const pageTableData = ref<ComponentsData[]>([]); // 当前显示的树（可能是过滤后的）
-const total = ref(0);
-const selectIds = ref<number[]>([]);
-const dataTableRef = ref();
-const pagination = reactive({
-  page_no: 1,
-  page_size: 10,
-});
-
-const props = defineProps<{
-  queryParams?: ComponentsQuery;
-}>();
-
-const emit = defineEmits<{
-  (e: "row-click", row: ComponentsData): void;
-  (e: "load-data", data: ComponentsData[]): void; // 新增：数据加载完成后传给父组件
-}>();
-
-// 组件名称
 defineOptions({
   name: "ComponentsTable",
+  inheritAttrs: false,
 });
 
-// 【关键修改点】
-// 暴露 pageTableData 让父组件可以直接修改它（实现前端过滤结果的注入）
-defineExpose({
-  handleQuery,
-  pageTableData,
-  loading,
+interface Props {
+  data?: ComponentsData[];
+  queryParams?: ComponentsQuery; 
+  currentPage?: number;
+  pageSize?: number;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  queryParams: () => ({}),
+  currentPage: 1,
+  pageSize: 10,
+});
+
+const emit = defineEmits<{
+  (e: 'update:currentPage', val: number): void;
+  (e: 'update:pageSize', val: number): void;
+  (e: 'load-data', data: ComponentsData[]): void;
+}>();
+
+
+// --- 状态管理 ---
+const loading = ref<boolean>(false);
+const internalData = ref<ComponentsData[]>([]); // 内部存储数组
+const displayData = computed<ComponentsData[]>(() => {
+  // 优先使用父组件传递的数据（支持空数组，用于显示搜索无结果）
+  // 仅当 props.data 为 undefined 时，才使用内部数据
+  if (props.data !== undefined) {
+    return props.data;
+  }
+  return internalData.value;
 });
 
 /**
- * 查询方法：
- * 在你的业务场景下，它负责从后端获取“原始全量数据”
+ * 请求 API 数据
+ * @param params 符合 ComponentsQuery 结构的查询对象
  */
-async function handleQuery() {
-  // 如果没有项目代码，不执行查询
-  // if (!props.queryParams?.project_code) return;
-
+const handleQuery = async (params?: ComponentsQuery) => {
   loading.value = true;
   try {
-    const params = {
-      ...props.queryParams,
-      // 如果要前端过滤，通常后端不分页，传一个很大的 page_size 或特定参数
-      page_no: pagination.page_no,
-      page_size: pagination.page_size,
-    };
-    const res = await ComponentsAPI.getList(params);
-    // 修正路径：增加对 res.data.data.items 的兼容
-    const rawData = res.data?.items || res.data?.data?.items || [];
-    const totalCount = res.data?.total || res.data?.data?.total || 0;
-
-    // 1. 更新本地显示
-    pageTableData.value = rawData;
-    total.value = totalCount;
-
-    // 2. 关键：把拿到的原始全量数据抛给父组件，让 SearchForm 有“原材料”可以过滤
-    emit("load-data", rawData as ComponentsData[]);
+    const res = await ComponentsAPI.getList(params || {});
+    internalData.value = res.data?.data?.items || (Array.isArray(res.data.data) ? res.data.data : []) || [];
+    emit('load-data', internalData.value);    
+  } catch (error) {
+    console.error("获取部件数据失败:", error);
+    internalData.value = [];
   } finally {
     loading.value = false;
   }
-}
+};
 
-// 表格选择
-function handleSelectionChange(selection: ComponentsData[]) {
-  selectIds.value = selection.map((item) => item.id);
-}
+// 事件转发逻辑
+const handlePageUpdate = (val: number) => emit('update:currentPage', val);
+const handleSizeUpdate = (val: number) => emit('update:pageSize', val);
 
-// 表格行点击
-function handleRowClick(row: ComponentsData) {
-  emit("row-click", row);
-}
+// 暴露刷新方法给父组件
+defineExpose({ 
+  handleQuery 
+});
+
 </script>
 
 <style scoped>
-.components-table-container {
+
+.components-table {
+  flex: 1;
+  width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
+
 </style>

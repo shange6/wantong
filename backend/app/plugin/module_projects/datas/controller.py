@@ -45,6 +45,6 @@ async def save_data_controller(
     保存前端数据到数据库
     """
     result =await DatasService.save_datas_service(payload)
-    msg = f"保存数据成功! 新增项目: {result.get('project_added')}, 新增部件: {result.get('component_added')}, 新增零件: {result.get('parts_added')}"
+    msg = f"保存数据成功! 新增项目: {result.get('projects_added')}, 新增部件: {result.get('components_added')}, 新增零件: {result.get('parts_added')}"
     log.info(msg)
     return SuccessResponse(data=result, msg=msg)

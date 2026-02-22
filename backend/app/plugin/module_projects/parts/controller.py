@@ -8,17 +8,17 @@ from app.core.router_class import OperationLogRoute
 from app.api.v1.module_system.auth.schema import AuthSchema
 from app.core.dependencies import AuthPermission
 
-PartsRouter = APIRouter(route_class=OperationLogRoute, prefix="/parts", tags=["组件管理"])
+PartsRouter = APIRouter(route_class=OperationLogRoute, prefix="/parts", tags=["项目管理"])
 
 @PartsRouter.get("/list", summary="获取组件列表")
 async def get_parts_list(
-    page: Annotated[PaginationQueryParam, Depends()],
+    # page: Annotated[PaginationQueryParam, Depends()],
     search: Annotated[PartsFilter, Depends()],
     auth: Annotated[AuthSchema, Depends(AuthPermission(["module_projects:parts:query"]))]
 ):
     data = await PartsService.get_parts_list_service(
-        page_no=page.page_no,
-        page_size=page.page_size,
+        # page_no=page.page_no,
+        # page_size=page.page_size,
         search=search
     )
     return SuccessResponse(data=data)

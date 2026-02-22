@@ -9,7 +9,7 @@ from app.core.exceptions import CustomException
 from app.core.logger import log
 from app.core.database import async_db_session
 from sqlalchemy import select
-from app.plugin.module_projects.project.model import ProjectsModel
+from app.plugin.module_projects.projects.model import ProjectsModel
 from app.plugin.module_projects.components.model import ComponentsModel
 from app.plugin.module_projects.parts.model import PartsModel
 from .schema import DatasUploadSchema, SaveDatasSchema
@@ -100,7 +100,7 @@ class DatasService:
                     session.add(project)
                     # 必须 flush 以确保后续组件能拿到 project_id 或正确的 code 关联
                     await session.flush()
-                    stats["project_added"] = 1  # 记录新增项目
+                    stats["projects_added"] = 1  # 记录新增项目
                 else:
                     # 如果项目已存在，直接使用查询到的对象，不进行任何修改
                     pass
@@ -118,7 +118,7 @@ class DatasService:
                         project_code=project.code,
                         # parent_code=payload.components.parent_code, # Aliased field
                         wtcode=payload.components.wtcode,
-                        name=payload.components.name,
+                        spec=payload.components.spec,
                         code=payload.components.code,
                         count=payload.components.count,
                         material=payload.components.material,
@@ -128,7 +128,7 @@ class DatasService:
                     )
                     session.add(component)
                     await session.flush()
-                    stats["component_added"] = 1  # 记录新增组件
+                    stats["components_added"] = 1  # 记录新增组件
 
                 # 3. 处理明细信息 (Parts)
                 # 假设 parts 数量较多，先一次性查询出该组件下已存在的 wtcode

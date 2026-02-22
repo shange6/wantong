@@ -1,7 +1,7 @@
 from typing import List, Optional
 from pydantic import BaseModel, Field
 
-from app.plugin.module_projects.project.schema import ProjectCreate
+from app.plugin.module_projects.projects.schema import ProjectsCreate
 from app.plugin.module_projects.components.schema import ComponentsCreate
 from app.plugin.module_projects.parts.schema import PartsCreate
 
@@ -12,7 +12,7 @@ class DatasUploadSchema(BaseModel):
     file_size: int = Field(..., description="文件大小")
     upload_time: str = Field(..., description="上传时间") # datetime serialized
 
-class ProjectsImportSchema(ProjectCreate):
+class ProjectsImportSchema(ProjectsCreate):
     pass
 
 class ComponentsImportSchema(ComponentsCreate):

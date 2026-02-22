@@ -1,6 +1,6 @@
 from sqlalchemy import select, func, or_
 from .model import ComponentsModel
-from app.plugin.module_projects.project.model import ProjectsModel
+from app.plugin.module_projects.projects.model import ProjectsModel
 from .schema import ComponentsCreate, ComponentsUpdate, ComponentsFilter, ComponentsOut
 from app.core.database import async_db_session
 from app.core.exceptions import CustomException

@@ -25,6 +25,8 @@ interface ConfigState {
   ip_white_list: ConfigTable;
 }
 
+let loadingPromise: Promise<void> | null = null;
+
 export const useConfigStore = defineStore("config", {
   state: () => ({
     configData: {} as ConfigState, // 存储系统配置
@@ -33,14 +35,23 @@ export const useConfigStore = defineStore("config", {
 
   actions: {
     async getConfig() {
-      const response = await ParamsAPI.getInitConfig();
-      response.data.data.forEach((item: ConfigTable) => {
-        // 确保所有配置项都正确映射到 configData
-        if (item.config_value !== undefined) {
-          this.configData[item.config_key as keyof ConfigState] = item;
+      if (loadingPromise) return loadingPromise;
+      
+      loadingPromise = (async () => {
+        try {
+          const response = await ParamsAPI.getInitConfig();
+          response.data.data.forEach((item: ConfigTable) => {
+            // 确保所有配置项都正确映射到 configData
+            if (item.config_value !== undefined) {
+              this.configData[item.config_key as keyof ConfigState] = item;
+            }
+          });
+          this.isConfigLoaded = true;
+        } finally {
+          loadingPromise = null;
         }
-      });
-      this.isConfigLoaded = true;
+      })();
+      return loadingPromise;
     },
   },
   persist: true,

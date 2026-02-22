@@ -1,190 +1,143 @@
 <template>
-  <div class="components-table-container">
-    <BaseCard
-      v-bind="$attrs"
-      ref="dataTableRef"
-      v-loading="loading"
+  <div class="parts-table" v-loading="loading">
+    <MiddleTable 
+      v-bind="$attrs" 
+      :data="displayData"
       row-key="wtcode"
       :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
-      :data="pageTableData"
-      :header-cell-style="{ textAlign: 'center' }"
-      class="data-table__content"
-      border
-      stripe
-      height="100%"
-      @selection-change="handleSelectionChange"
-      @row-click="handleRowClick"
-    ></BaseCard>
+      :current-page="currentPage"
+      :page-size="pageSize"
+      @update:current-page="handlePageUpdate"
+      @update:page-size="handleSizeUpdate"
+    >
+      <template #append-columns="{ formatWtCode }">
+        <el-table-column type="selection" fixed min-width="20" align="center" />        
+        <el-table-column label="万通码" prop="wtcode" min-width="100" show-overflow-tooltip>
+          <template #default="{ row }">
+            <span class="wtcode-text">{{ formatWtCode(row.wtcode) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="代号" prop="code" min-width="110" show-overflow-tooltip />
+        <el-table-column label="名称" prop="spec" min-width="100" show-overflow-tooltip />
+        <el-table-column label="数量" prop="count" min-width="40" align="center" />
+        <el-table-column label="材料" prop="material" min-width="120" show-overflow-tooltip align="center" />
+        <el-table-column label="单重" prop="unit_mass" min-width="60" align="center" />
+        <el-table-column label="总重" prop="total_mass" min-width="70" align="center" />
+        <el-table-column label="备注" prop="remark" min-width="80" show-overflow-tooltip />
+        <slot name="operation-column"></slot>
+      </template>
+    </MiddleTable>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, watch } from "vue";
-import BaseCard from "./BaseCard.vue";
-import PartsAPI, { PartsData, PartsForm, PartsQuery } from "@/api/module_projects/parts";
-import { formatTree } from "@/utils/common";
+import { ref, computed, watch, onMounted } from "vue";
+import MiddleTable from "./MiddleTable.vue";
+import PartsAPI, { type PartsData, type PartsQuery } from "@/api/module_projects/parts";
 
-// 表格数据
-const loading = ref(false); // 表格加载状态
-const pageTableData = ref<PartsData[]>([]); // 渲染在表格上的树形数据
-const total = ref(0); // 总条数
-const selectIds = ref<number[]>([]); // 选中的行 ID 集合
-const selectedId = ref<number | undefined>(undefined);
-const dataTableRef = ref(); // BaseCard 的组件实例引用
-
-const props = defineProps<{
-  queryParams?: PartsQuery; // 查询参数
-  tableData?: PartsData[]; // 外部传入的数据
-}>();
-
-// 监听外部数据变化
-watch(
-  () => props.tableData,
-  (val) => {
-    // 移除 val.length > 0 的判断，允许空数组更新
-    if (val) {
-      pageTableData.value = val;
-      total.value = val.length;
-      console.log("PartsTable received external data:", val);
-    }
-  },
-  { 
-    immediate: true, 
-    deep: true 
-  }
-);
-
-// 表单数据
-const formRef = ref();
-const formData = reactive<PartsForm>({
-  project_code: "",
-  parent_code: "",
-  wtcode: "",
-  code: "",
-  spec: "",
-  count: 0,
-  material: "",
-  unit_mass: 0,
-  total_mass: 0,
-  remark: "",
-});
-
-// 重置表单
-function resetForm() {
-  formRef.value?.resetFields();
-  Object.assign(formData, {
-    id: undefined,
-    project_code: "",
-    parent_code: "",
-    wtcode: "",
-    code: "",
-    spec: "",
-    count: 0,
-    material: "",
-    unit_mass: 0,
-    total_mass: 0,
-    remark: "",
-  });
-}
-// 组件名称
 defineOptions({
   name: "PartsTable",
+  inheritAttrs: false,
 });
 
+interface Props {
+  data?: PartsData[];
+  queryParams?: PartsQuery; 
+  currentPage?: number;
+  pageSize?: number;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  queryParams: () => ({}),
+  currentPage: 1,
+  pageSize: 10,
+});
+
+const emit = defineEmits<{
+  (e: 'update:currentPage', val: number): void;
+  (e: 'update:pageSize', val: number): void;
+  (e: 'load-data', val: any[]): void; 
+}>();
+
+// --- 4. 内部状态管理 ---
+const loading = ref(false);
+const internalData = ref<PartsData[]>([]); // 内部存储数组
+const displayData = computed<PartsData[]>(() => {
+  // 优先使用父组件传递的数据（支持空数组，用于显示搜索无结果）
+  // 仅当 props.data 为 undefined 时，才使用内部数据
+  if (props.data !== undefined) {
+    if (!Array.isArray(props.data)) {
+      return [];
+    }
+    return props.data;
+  }
+  if (!Array.isArray(internalData.value)) {
+    return [];
+  }
+  return listToTree([...internalData.value]); 
+});
+
+/**
+ * 请求 API 数据
+ * @param params 符合 PartsQuery 结构的查询对象
+ */
+const handleQuery = async (params?: PartsQuery) => {
+  loading.value = true;
+  try {
+    const res = await PartsAPI.getList(params || {});
+    internalData.value = res.data?.data?.items || (Array.isArray(res.data.data) ? res.data.data : []) || [];    
+    emit('load-data', internalData.value); // 加载成功后向外抛出事件
+  } catch (error) {
+    console.error("获取零件数据失败:", error);
+    internalData.value = [];
+  } finally {
+    loading.value = false;
+  }
+};
+
+// 转换数组格式符合折叠标准
 const listToTree = (data: any[]) => {
   const map: Record<string, any> = {};
   const roots: any[] = [];
-
-  // 按照 wtcode 排序，确保父节点在处理时容易找到（虽然 map 查找不依赖顺序，但排序是个好习惯）
   data.sort((a, b) => a.wtcode.length - b.wtcode.length || a.wtcode.localeCompare(b.wtcode));
-
-  data.forEach((item) => {
-    // 初始化每个节点，添加 children 数组
-    map[item.wtcode] = { ...item, children: [] };
-  });
-
+  data.forEach((item) => { map[item.wtcode] = { ...item, children: [] }; });
   data.forEach((item) => {
     const node = map[item.wtcode];
-    // 检查是否有上级。零件的 wtcode 格式通常是 'PROJECT.COMP.PART'
     const lastDotIndex = item.wtcode.lastIndexOf(".");
-
     if (lastDotIndex > -1) {
       const parentWtcode = item.wtcode.substring(0, lastDotIndex);
       if (map[parentWtcode]) {
         map[parentWtcode].children.push(node);
       } else {
-        // 如果找不到直接父节点，可能它的父节点是组件，不在零件列表里，所以它本身是零件表的根
         roots.push(node);
       }
     } else {
-      // 没有点号，说明是顶级节点
       roots.push(node);
     }
   });
   return roots;
 };
 
-// 组件挂载时查询
-// onMounted(() => {
-//   handleQuery();
-// });
+const handlePageUpdate = (val: number) => emit('update:currentPage', val);
+const handleSizeUpdate = (val: number) => emit('update:pageSize', val);
 
-// 暴露查询方法
-defineExpose({
+// 暴露刷新方法给父组件
+defineExpose({ 
   handleQuery,
-  pageTableData,
-  listToTree,
+  listToTree
 });
 
-// 查询
-async function handleQuery() {
-  loading.value = true;
-  try {
-    const params = {
-      ...props.queryParams,
-      page_no: 1,
-      page_size: 0, // 0 表示不分页，获取全部数据
-    };
-    const res = await PartsAPI.getList(params);
-    // 修正路径：增加对 res.data.data.items 的兼容
-    const rawData = res.data?.items || res.data?.data?.items || [];
-    const totalCount = res.data?.total || res.data?.data?.total || 0;
-
-    // 1. 更新本地显示
-    pageTableData.value = listToTree(rawData);
-    total.value = totalCount;
-
-    // 2. 关键：把拿到的原始全量数据抛给父组件，让 SearchForm 有“原材料”可以过滤
-    emit("load-data", rawData);
-  } finally {
-    loading.value = false;
-  }
-}
-
-// 表格选择
-function handleSelectionChange(selection: PartsData[]) {
-  selectIds.value = selection.map((item) => item.id);
-}
-
-// 抛出事件
-const emit = defineEmits<{
-  (e: "row-click", row: PartsData): void;
-  (e: "load-data", data: PartsData[]): void; // 新增：数据加载完成后传给父组件
-}>();
-
-// 表格行点击
-function handleRowClick(row: PartsData) {
-  // 关键：将行数据传给父组件
-  emit("row-click", row);
-}
 </script>
 
+
 <style scoped>
-.components-table-container {
+
+.parts-table {
+  flex: 1;
+  width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  /* margin-top: 0px; */
 }
 </style>

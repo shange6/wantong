@@ -241,7 +241,7 @@ def dxf2dict(dxf_path: str) -> dict:
     dxf_data["零件数量"] =  len(dxf_data_list)
     project_info = get_project_info(doc)
     if project_info["文件数量"] != dxf_data["文件个数"]:
-        msg = f"错误！！！表格个数❌ {project_info['page_sum']} != {dxf_data['page_count']}"
+        msg = f"错误！！！表格个数❌ {project_info['文件数量']} != {dxf_data['文件个数']}"
         dxf_data["info"].append(msg)
         print(msg)
     dxf_data.update(project_info)

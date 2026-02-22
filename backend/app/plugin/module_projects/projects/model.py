@@ -10,7 +10,7 @@ class ProjectsModel(ModelMixin, UserMixin):
     """
     项目表
     """
-    __tablename__ = "projects_project"
+    __tablename__ = "projects_projects"
     __table_args__ = {"comment": "项目表"}
     
     code: Mapped[str] = mapped_column(String(64), unique=True, index=True, comment="项目编码")
@@ -20,6 +20,6 @@ class ProjectsModel(ModelMixin, UserMixin):
     # 关联组件
     components: Mapped[List["ComponentsModel"]] = relationship(
         "ComponentsModel",
-        back_populates="project", 
+        back_populates="projects", 
         cascade="all, delete-orphan"
     )

@@ -100,7 +100,7 @@
   </teleport>
 
   <!-- 配置中心抽屉 -->
-  <ConfigInfoDrawer v-model="drawerVisible" />
+  <ConfigInfoDrawer v-if="drawerVisible" v-model="drawerVisible" />
 </template>
 
 <script setup lang="ts">

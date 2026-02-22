@@ -7,7 +7,7 @@ from app.core.dependencies import AuthPermission
 from .service import ComponentsService
 from .schema import ComponentsCreate, ComponentsUpdate, ComponentsFilter
 
-ComponentsRouter = APIRouter(prefix="/components", tags=["部件管理"])
+ComponentsRouter = APIRouter(prefix="/components", tags=["项目管理"])
 
 @ComponentsRouter.get("/list", summary="获取部件列表")
 async def get_components_list(

@@ -1,12 +1,12 @@
 from sqlalchemy import select, func, or_
 from .model import ProjectsModel
-from .schema import ProjectCreate, ProjectUpdate, ProjectFilter, ProjectOut
+from .schema import ProjectsCreate, ProjectsUpdate, ProjectsFilter, ProjectsOut
 from app.core.database import async_db_session
 from app.core.exceptions import CustomException
 
-class ProjectService:
+class ProjectsService:
     @classmethod
-    async def get_project_list_service(cls, page_no: int, page_size: int, search: ProjectFilter):
+    async def get_projects_list_service(cls, search: ProjectsFilter):
         async with async_db_session() as session:
             stmt = select(ProjectsModel)
             
@@ -19,28 +19,27 @@ class ProjectService:
                 stmt = stmt.where(ProjectsModel.no.ilike(f"%{search.no}%"))
             
             # Total count
-            count_stmt = select(func.count()).select_from(stmt.subquery())
-            total = (await session.execute(count_stmt)).scalar() or 0
+            # count_stmt = select(func.count()).select_from(stmt.subquery())
+            # total = (await session.execute(count_stmt)).scalar() or 0
             
             # Pagination
-            stmt = stmt.offset((page_no - 1) * page_size).limit(page_size)
-            stmt = stmt.order_by(ProjectsModel.code.desc())
+            # stmt = stmt.offset((page_no - 1) * page_size).limit(page_size)
+            stmt = stmt.order_by(ProjectsModel.no.desc())
             
             result = await session.execute(stmt)
             items = result.scalars().all()
+            total = len(items)
             
             # Serialize to Pydantic models then to dicts
-            data_list = [ProjectOut.model_validate(item).model_dump() for item in items]
+            data_list = [ProjectsOut.model_validate(item).model_dump() for item in items]
             
             return {
                 "items": data_list,
                 "total": total,
-                "page_no": page_no,
-                "page_size": page_size
             }
 
     @classmethod
-    async def create_project_service(cls, data: ProjectCreate):
+    async def create_projects_service(cls, data: ProjectsCreate):
         async with async_db_session() as session:
             async with session.begin():
                 # Check duplication
@@ -56,7 +55,7 @@ class ProjectService:
             return project
 
     @classmethod
-    async def update_project_service(cls, id: int, data: ProjectUpdate):
+    async def update_projects_service(cls, id: int, data: ProjectsUpdate):
         async with async_db_session() as session:
             async with session.begin():
                 stmt = select(ProjectsModel).where(ProjectsModel.id == id)
@@ -80,7 +79,7 @@ class ProjectService:
             return project
 
     @classmethod
-    async def delete_project_service(cls, ids: list[int]):
+    async def delete_projects_service(cls, ids: list[int]):
         async with async_db_session() as session:
             async with session.begin():
                 stmt = select(ProjectsModel).where(ProjectsModel.id.in_(ids))

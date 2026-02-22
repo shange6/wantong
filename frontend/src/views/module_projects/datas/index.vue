@@ -40,7 +40,7 @@
     
 
     <!-- 内容区域 -->     
-    <PartsTable v-show="!isShow" :table-data="pageTableData" />
+    <PartsTable v-show="!isShow" :data="pageTableData" />
 
     <!-- 空数据时显示上传组件 -->
      <el-row v-show="isShow" :gutter="20">
@@ -462,7 +462,7 @@ async function handleHttpRequest(options: any) {
     // 9. 更新表格总条数
     total.value = pageTableData.value.length;
     // 10. 自动切换到表格视图
-    isShow.value = false;
+    // isShow.value = false;
 
   } catch (error) {
     console.error("上传失败:", error);
