@@ -69,7 +69,7 @@ const displayData = computed<PartsData[]>(() => {
     if (!Array.isArray(props.data)) {
       return [];
     }
-    return props.data;
+    return listToTree([...props.data]);
   }
   if (!Array.isArray(internalData.value)) {
     return [];

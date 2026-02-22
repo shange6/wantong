@@ -3,9 +3,9 @@
     <SearchForm
       v-model="queryFormData"
       :source-data="allTableData"
-      :show-material="false"
+      :show-no="false"
       @update="handleFilterUpdate"
-      @reset="handleResetQuery"
+      @reset="handleFilterReset"
     >      
       <template #extra>
         <el-button
@@ -96,7 +96,7 @@ function handleFilterUpdate(filtered: any[]) {
 /**
  * 重置查询：清空过滤状态
  */
-function handleResetQuery() {
+function handleFilterReset() {
   filteredData.value = null;
   pagination.currentPage = 1;
 }

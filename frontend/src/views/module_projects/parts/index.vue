@@ -2,10 +2,10 @@
   <div class="app-container">
     <SearchForm
       v-model="queryFormData"
-      :source-data="allComponentsData"
+      :source-data="partsTableVisible ? allPartsData : allComponentsData"
       :show-no="false"
-      @update="handleComponentsFilter"
-      @reset="handleResetQuery"
+      @update="handleFilterUpdate"
+      @reset="handleFilterReset"
     >      
       <template #extra>
         <el-button
@@ -28,6 +28,8 @@
     <PartsTable
       v-show="partsTableVisible"
       ref="partsTableRef"
+      :data="partsData"
+      @load-data="handlePartsLoad"
       :currentPage="paginationParts.currentPage"
       :pageSize="paginationParts.pageSize"
       @update:currentPage="(val) => paginationParts.currentPage = val"
@@ -37,7 +39,9 @@
     <ComponentsTable
       v-show="!partsTableVisible"
       ref="componentsTableRef"
+      :data="componentsData"
       @row-click="handleComponentRowClick"
+      @load-data="handleComponentsLoad"
       :currentPage="paginationComponents.currentPage"
       :pageSize="paginationComponents.pageSize"
       @update:currentPage="(val) => paginationComponents.currentPage = val"
@@ -99,9 +103,14 @@ const partsData = computed(() => {
 });
 
 // 搜索过滤
-function handleComponentsFilter(filtered: any[]) {
-  filteredComponentsData.value = filtered;
-  paginationComponents.currentPage = 1;
+function handleFilterUpdate(filtered: any[]) {
+if (partsTableVisible.value) {  // 如果当前在看零件表
+    filteredPartsData.value = filtered;
+    paginationParts.currentPage = 1;
+  } else {  // 如果当前在看组件表 
+    filteredComponentsData.value = filtered;
+    paginationComponents.currentPage = 1;
+  }
 }
 
 // 行点击联动逻辑 🔗
@@ -120,9 +129,14 @@ function handleProjectRowClick(row: any) {
   partsTableVisible.value = false
 }
 
-const handleResetQuery = () => {
-  filteredComponentsData.value = null;
-  paginationComponents.currentPage = 1;
+const handleFilterReset = () => {
+  if (partsTableVisible.value) {
+    filteredPartsData.value = null;
+    paginationParts.currentPage = 1;
+  } else {
+    filteredComponentsData.value = null;
+    paginationComponents.currentPage = 1;
+  }
 };
 
 const handleOpenProjectDrawer = () => {
@@ -132,8 +146,32 @@ const handleOpenProjectDrawer = () => {
 // 切换表格展示
 function toggleTable() {
   partsTableVisible.value = !partsTableVisible.value;
-  // 切换后执行一次重置式查询，确保新表有数据
-  // handleResetQuery();
+}
+
+/**
+ * 处理组件表加载的数据
+ * 当 ComponentsTable 完成 API 请求后触发
+ */
+function handleComponentsLoad(data: any[]) {
+  // 1. 存储全量数据，供 SearchForm 作为搜索源
+  allComponentsData.value = data;
+  // 2. 加载新数据时，清空之前的过滤结果，恢复显示全量
+  filteredComponentsData.value = null;
+  // 3. 重置分页到第一页
+  paginationComponents.currentPage = 1;
+}
+
+/**
+ * 处理零件表加载的数据
+ * 当 PartsTable 完成 API 请求后触发
+ */
+function handlePartsLoad(data: any[]) {
+  // 1. 存储全量数据
+  allPartsData.value = data;
+  // 2. 清空过滤状态
+  filteredPartsData.value = null;
+  // 3. 重置分页
+  paginationParts.currentPage = 1;
 }
 
 </script>
