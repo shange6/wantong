@@ -6,7 +6,7 @@
       :show-no="false"
       @update="handleFilterUpdate"
       @reset="handleFilterReset"
-    >      
+    >
       <template #extra>
         <el-button
           v-hasPerm="['module_system:menu:query']"
@@ -21,16 +21,16 @@
     <ComponentsTable
       ref="projectTableRef"
       :data="displayData"
-      :currentPage="pagination.currentPage"
-      :pageSize="pagination.pageSize"
-      @load-data="handleTableLoad" 
-      @update:currentPage="(val) => pagination.currentPage = val"
-      @update:pageSize="(val) => pagination.pageSize = val"
+      :current-page="pagination.currentPage"
+      :page-size="pagination.pageSize"
+      @load-data="handleTableLoad"
+      @update:current-page="(val) => (pagination.currentPage = val)"
+      @update:page-size="(val) => (pagination.pageSize = val)"
     />
 
     <ProjectsDrawerTable
-      :drawerVisible="projectDrawerVisible"
-      @update:drawerVisible="(val) => projectDrawerVisible = val"
+      :drawer-visible="projectDrawerVisible"
+      @update:drawer-visible="(val) => (projectDrawerVisible = val)"
       @row-click="handleProjectRowClick"
     />
   </div>
@@ -51,14 +51,14 @@ const projectTableRef = ref(); // 修正：与模板中的 ref 一致
 const projectDrawerVisible = ref(false);
 
 // 原始数据底稿（供 SearchForm 过滤用）
-const allTableData = ref<any[]>([]); 
+const allTableData = ref<any[]>([]);
 // 过滤后的展示数据
 const filteredData = ref<any[] | null>(null);
 
 // 分页状态（必须在父组件管理，否则分页点击无效）
 const pagination = reactive({
   currentPage: 1,
-  pageSize: 10
+  pageSize: 10,
 });
 
 // 查询参数
@@ -113,11 +113,9 @@ function handleProjectRowClick(row: any) {
 const handleOpenProjectDrawer = () => {
   projectDrawerVisible.value = !projectDrawerVisible.value;
 };
-
 </script>
 
 <style scoped>
-
 .app-container {
   /* 确保占满屏幕且不产生双滚动条 */
   /* height: 100vh; */
@@ -126,5 +124,4 @@ const handleOpenProjectDrawer = () => {
   flex-direction: column;
   overflow: hidden;
 }
-
 </style>

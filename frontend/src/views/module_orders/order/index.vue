@@ -2,11 +2,17 @@
   <div class="app-container">
     <!-- 搜索表单 -->
     <!-- 数据表格 -->
-    <el-table v-loading="loading" :data="tableData" border style="width: 100%;" align="center" >
+    <el-table v-loading="loading" :data="tableData" border style="width: 100%" align="center">
       <!-- <el-table-column prop="id" label="ID" width="80" /> -->
       <!-- <el-table-column prop="wtcode" label="万通码" min-width="130" fixed="left"/> -->
-      <el-table-column prop="components_code" label="代码" min-width="130" fixed="left"/>
-      <el-table-column prop="components_spec" label="名称" min-width="130" align="center" fixed="left"/>
+      <el-table-column prop="components_code" label="代码" min-width="130" fixed="left" />
+      <el-table-column
+        prop="components_spec"
+        label="名称"
+        min-width="130"
+        align="center"
+        fixed="left"
+      />
       <el-table-column prop="components_count" label="数量" min-width="60" align="center" />
       <el-table-column prop="components_material" label="材料" min-width="130" align="center" />
       <el-table-column prop="components_unit_mass" label="单重" min-width="60" align="center" />
@@ -44,7 +50,9 @@ const queryParams = reactive<OrdersPageQuery>({
 });
 
 async function handleQuery() {
-  if (loading.value) {return}
+  if (loading.value) {
+    return;
+  }
   loading.value = true;
   try {
     const res = await OrdersAPI.getList(queryParams);

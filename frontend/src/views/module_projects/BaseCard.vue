@@ -24,13 +24,11 @@ import BaseTable from "./BaseTable.vue";
 // 禁用自动属性继承，改为手动 v-bind
 defineOptions({
   name: "BaseCard",
-  inheritAttrs: false
+  inheritAttrs: false,
 });
-
 </script>
 
 <style scoped>
-
 .base-card-wrapper {
   flex: 1;
   width: 100%;
@@ -59,5 +57,4 @@ defineOptions({
   overflow: hidden;
   flex-direction: column;
 }
-
 </style>

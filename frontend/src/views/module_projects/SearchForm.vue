@@ -23,7 +23,7 @@
           :model-value="modelValue.spec"
           placeholder="请输入名称"
           clearable
-          style="width: 100px; "
+          style="width: 100px"
           class="search-input"
           @update:model-value="(val) => handleInput('spec', val)"
         />
@@ -60,7 +60,7 @@
 </template>
 
 <script setup lang="ts">
-import { onUnmounted, toRaw, watch } from 'vue';
+import { onUnmounted, toRaw, watch } from "vue";
 
 // 1. 类型定义
 interface TreeNode {
@@ -97,9 +97,9 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<{
-  (e: 'update', data: TreeNode[]): void;
-  (e: 'update:modelValue', value: QueryModel): void;
-  (e: 'reset'): void;
+  (e: "update", data: TreeNode[]): void;
+  (e: "update:modelValue", value: QueryModel): void;
+  (e: "reset"): void;
 }>();
 
 /**
@@ -107,7 +107,7 @@ const emit = defineEmits<{
  */
 const filterData = (nodes: TreeNode[], query: QueryModel): TreeNode[] => {
   if (!nodes || nodes.length === 0) return [];
-  
+
   // 预处理搜索关键字
   const q = {
     code: (query?.code || "").toString().trim().toLowerCase(),
@@ -122,10 +122,10 @@ const filterData = (nodes: TreeNode[], query: QueryModel): TreeNode[] => {
   return nodes.reduce((acc, node) => {
     // 【关键修改点 1】：判断是否存在子节点
     const hasChildren = Array.isArray(node.children) && node.children.length > 0;
-    
+
     // 如果有子节点，递归过滤；如果没有，返回空数组
     const filteredChildren = hasChildren ? filterData(node.children!, query) : [];
-    
+
     // 属性安全提取
     const nCode = String(node.code ?? "").toLowerCase();
     const nSpec = String(node.spec ?? node.name ?? "").toLowerCase(); // spec和name有一个字段即可
@@ -143,7 +143,7 @@ const filterData = (nodes: TreeNode[], query: QueryModel): TreeNode[] => {
     // 【关键修改点 2】：决定是否保留节点及如何构建结构
     if (isMatch || filteredChildren.length > 0) {
       const newNode = { ...toRaw(node) };
-      
+
       if (hasChildren) {
         // 如果原始数据是树形，挂载过滤后的子集
         newNode.children = filteredChildren;
@@ -151,7 +151,7 @@ const filterData = (nodes: TreeNode[], query: QueryModel): TreeNode[] => {
         // 如果原始数据是扁平的（没有 children 属性），确保结果中也不出现空 children 数组
         delete newNode.children;
       }
-      
+
       acc.push(newNode);
     }
     return acc;
@@ -170,13 +170,13 @@ const handleReset = () => {
     material: undefined,
     no: undefined,
   };
-  
+
   // 1. 更新父组件的 v-model
-  emit('update:modelValue', resetQuery);
-  
+  emit("update:modelValue", resetQuery);
+
   // 2. 触发父组件的 reset 事件（用于恢复全量数据等业务逻辑）
-  emit('reset');
-  
+  emit("reset");
+
   // 3. 强制执行一次空过滤，确保表格显示完整数据
   // 注意：此时 props.modelValue 可能还未更新（取决于父组件响应速度），
   // 所以直接传空对象进行过滤
@@ -197,12 +197,11 @@ function debounce(fn: Function, delay: number) {
 
 const handleInput = (key: keyof QueryModel, val: string) => {
   // 1. 构造最新的查询对象
-  const nextQuery = { ...props.modelValue, [key]: val };  
+  const nextQuery = { ...props.modelValue, [key]: val };
   // 2. 更新父组件的 v-model (同步状态)
-  emit('update:modelValue', nextQuery);  
+  emit("update:modelValue", nextQuery);
   // 3. 【核心】立即执行过滤并通知父组件更新列表
   const filtered = filterData(props.sourceData, nextQuery);
   emit("update", filtered);
 };
-
 </script>

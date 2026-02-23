@@ -1,8 +1,8 @@
 <template>
-  <div class="projects-table" v-loading="loading">
-    <MiddleTable 
-      v-bind="$attrs" 
-      :data="displayData" 
+  <div v-loading="loading" class="projects-table">
+    <MiddleTable
+      v-bind="$attrs"
+      :data="displayData"
       :current-page="currentPage"
       :page-size="pageSize"
       @row-click="handleRowClick"
@@ -11,9 +11,21 @@
     >
       <template #append-columns="{ formatWtCode }">
         <el-table-column type="selection" fixed width="40" align="center" />
-        <el-table-column label="代号" prop="code" min-width="90" show-overflow-tooltip align="center" />
+        <el-table-column
+          label="代号"
+          prop="code"
+          min-width="90"
+          show-overflow-tooltip
+          align="center"
+        />
         <el-table-column label="名称" prop="name" min-width="300" show-overflow-tooltip />
-        <el-table-column label="合同号" prop="no" min-width="80" show-overflow-tooltip align="center" />
+        <el-table-column
+          label="合同号"
+          prop="no"
+          min-width="80"
+          show-overflow-tooltip
+          align="center"
+        />
         <slot name="operation-column"></slot>
       </template>
     </MiddleTable>
@@ -37,10 +49,10 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<{
-  (e: 'update:currentPage', val: number): void;
-  (e: 'update:pageSize', val: number): void;
-  (e: 'row-click', row: ProjectsData): void;
-  (e: 'load-data', data: ProjectsData[]): void;
+  (e: "update:currentPage", val: number): void;
+  (e: "update:pageSize", val: number): void;
+  (e: "row-click", row: ProjectsData): void;
+  (e: "load-data", data: ProjectsData[]): void;
 }>();
 
 defineOptions({
@@ -69,12 +81,12 @@ const handleQuery = async (params?: ProjectsQuery) => {
   loading.value = true;
   try {
     const res = await ProjectsAPI.getList(params || {});
-    
+
     // 兼容后端返回结构 { data: { items: [], total: 0 } }
-    const rawData = res.data?.data?.items || (Array.isArray(res.data.data) ? res.data.data : []) || [];  
+    const rawData =
+      res.data?.data?.items || (Array.isArray(res.data.data) ? res.data.data : []) || [];
     internalData.value = rawData;
-    emit('load-data', rawData);
-    
+    emit("load-data", rawData);
   } catch (error) {
     console.error("获取项目数据失败:", error);
     internalData.value = [];
@@ -84,8 +96,8 @@ const handleQuery = async (params?: ProjectsQuery) => {
 };
 
 // 暴露刷新方法给父组件
-defineExpose({ 
-  handleQuery 
+defineExpose({
+  handleQuery,
 });
 
 onMounted(() => {
@@ -93,9 +105,9 @@ onMounted(() => {
 });
 
 // 事件转发逻辑
-const handlePageUpdate = (val: number) => emit('update:currentPage', val);
-const handleSizeUpdate = (val: number) => emit('update:pageSize', val);
-const handleRowClick = (row: ProjectsData) => emit('row-click', row);
+const handlePageUpdate = (val: number) => emit("update:currentPage", val);
+const handleSizeUpdate = (val: number) => emit("update:pageSize", val);
+const handleRowClick = (row: ProjectsData) => emit("row-click", row);
 </script>
 
 <style scoped>

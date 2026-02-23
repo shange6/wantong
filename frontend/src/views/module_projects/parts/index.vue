@@ -6,7 +6,7 @@
       :show-no="false"
       @update="handleFilterUpdate"
       @reset="handleFilterReset"
-    >      
+    >
       <template #extra>
         <el-button
           v-hasPerm="['module_system:menu:query']"
@@ -15,11 +15,7 @@
         >
           📂 项目
         </el-button>
-        <el-button
-          v-hasPerm="['module_projects:parts:query']"
-          type="warning"
-          @click="toggleTable"
-        >
+        <el-button v-hasPerm="['module_projects:parts:query']" type="warning" @click="toggleTable">
           {{ partsTableVisible ? "切换组件" : "切换零件" }}
         </el-button>
       </template>
@@ -29,28 +25,28 @@
       v-show="partsTableVisible"
       ref="partsTableRef"
       :data="partsData"
+      :current-page="paginationParts.currentPage"
+      :page-size="paginationParts.pageSize"
       @load-data="handlePartsLoad"
-      :currentPage="paginationParts.currentPage"
-      :pageSize="paginationParts.pageSize"
-      @update:currentPage="(val) => paginationParts.currentPage = val"
-      @update:pageSize="(val) => paginationParts.pageSize = val"
+      @update:current-page="(val) => (paginationParts.currentPage = val)"
+      @update:page-size="(val) => (paginationParts.pageSize = val)"
     />
 
     <ComponentsTable
       v-show="!partsTableVisible"
       ref="componentsTableRef"
       :data="componentsData"
+      :current-page="paginationComponents.currentPage"
+      :page-size="paginationComponents.pageSize"
       @row-click="handleComponentRowClick"
       @load-data="handleComponentsLoad"
-      :currentPage="paginationComponents.currentPage"
-      :pageSize="paginationComponents.pageSize"
-      @update:currentPage="(val) => paginationComponents.currentPage = val"
-      @update:pageSize="(val) => paginationComponents.pageSize = val"
+      @update:current-page="(val) => (paginationComponents.currentPage = val)"
+      @update:page-size="(val) => (paginationComponents.pageSize = val)"
     />
 
     <ProjectsDrawerTable
-      :drawerVisible="projectDrawerVisible"
-      @update:drawerVisible="(val) => projectDrawerVisible = val"
+      :drawer-visible="projectDrawerVisible"
+      @update:drawer-visible="(val) => (projectDrawerVisible = val)"
       @row-click="handleProjectRowClick"
     />
   </div>
@@ -68,7 +64,7 @@ defineOptions({ name: "ProjectsIndex" });
 // --- 1. 引用定义 (Refs) ---
 const componentsTableRef = ref();
 const partsTableRef = ref();
-const partsTableVisible = ref(false)
+const partsTableVisible = ref(false);
 const projectDrawerVisible = ref(false);
 
 // --- 2. 状态管理 (State) ---
@@ -95,7 +91,9 @@ const queryFormData = ref({
 
 // --- 3. 数据展示逻辑 (Computed) ---
 const componentsData = computed(() => {
-  return filteredComponentsData.value !== null ? filteredComponentsData.value : allComponentsData.value;
+  return filteredComponentsData.value !== null
+    ? filteredComponentsData.value
+    : allComponentsData.value;
 });
 
 const partsData = computed(() => {
@@ -104,10 +102,12 @@ const partsData = computed(() => {
 
 // 搜索过滤
 function handleFilterUpdate(filtered: any[]) {
-if (partsTableVisible.value) {  // 如果当前在看零件表
+  if (partsTableVisible.value) {
+    // 如果当前在看零件表
     filteredPartsData.value = filtered;
     paginationParts.currentPage = 1;
-  } else {  // 如果当前在看组件表 
+  } else {
+    // 如果当前在看组件表
     filteredComponentsData.value = filtered;
     paginationComponents.currentPage = 1;
   }
@@ -118,15 +118,15 @@ function handleComponentRowClick(row: any) {
   selectedComponent.value = row;
   // 核心：调用 PartsTable 暴露的方法请求新数据
   partsTableRef.value?.handleQuery({
-    component_wtcode: row.wtcode 
+    component_wtcode: row.wtcode,
   });
-  partsTableVisible.value = true
+  partsTableVisible.value = true;
 }
 
 function handleProjectRowClick(row: any) {
   queryFormData.value.project_code = row.code;
   componentsTableRef.value?.handleQuery?.();
-  partsTableVisible.value = false
+  partsTableVisible.value = false;
 }
 
 const handleFilterReset = () => {
@@ -173,7 +173,6 @@ function handlePartsLoad(data: any[]) {
   // 3. 重置分页
   paginationParts.currentPage = 1;
 }
-
 </script>
 
 <style scoped>

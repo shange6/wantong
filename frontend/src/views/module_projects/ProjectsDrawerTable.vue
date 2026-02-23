@@ -1,5 +1,5 @@
 <template>
-  <div class="projects-table" v-loading="loading">
+  <div v-loading="loading" class="projects-table">
     <el-drawer
       v-model="drawerVisible"
       title="请选择项目"
@@ -11,21 +11,33 @@
       :show-close="true"
     >
       <div class="drawer-content-wrapper">
-        <MiddleTable 
-        v-bind="$attrs" 
-        :data="displayData" 
-        :current-page="pagination.currentPage"
-        :page-size="pagination.pageSize"
-        @row-click="handleRowClick"
-        @update:current-page="(val) => pagination.currentPage = val"
-        @update:page-size="(val) => pagination.pageSize = val"
+        <MiddleTable
+          v-bind="$attrs"
+          :data="displayData"
+          :current-page="pagination.currentPage"
+          :page-size="pagination.pageSize"
+          @row-click="handleRowClick"
+          @update:current-page="(val) => (pagination.currentPage = val)"
+          @update:page-size="(val) => (pagination.pageSize = val)"
         >
           <template #append-columns="{ formatWtCode }">
-              <el-table-column type="selection" fixed width="40" align="center" />
-              <el-table-column label="代号" prop="code" min-width="70" show-overflow-tooltip align="center" />
-              <el-table-column label="名称" prop="name" min-width="120" show-overflow-tooltip />
-              <el-table-column label="合同号" prop="no" min-width="40" show-overflow-tooltip align="center" />
-              <slot name="operation-column"></slot>
+            <el-table-column type="selection" fixed width="40" align="center" />
+            <el-table-column
+              label="代号"
+              prop="code"
+              min-width="70"
+              show-overflow-tooltip
+              align="center"
+            />
+            <el-table-column label="名称" prop="name" min-width="120" show-overflow-tooltip />
+            <el-table-column
+              label="合同号"
+              prop="no"
+              min-width="40"
+              show-overflow-tooltip
+              align="center"
+            />
+            <slot name="operation-column"></slot>
           </template>
         </MiddleTable>
       </div>
@@ -50,18 +62,18 @@ interface Props {
 const props = defineProps<Props>();
 
 const emit = defineEmits<{
-  (e: 'row-click', row: ProjectsData): void;
-  (e: 'update:drawerVisible', val:boolean): void;
+  (e: "row-click", row: ProjectsData): void;
+  (e: "update:drawerVisible", val: boolean): void;
 }>();
 
 // --- 状态管理 ---
 const loading = ref<boolean>(false);
-const internalData = ref<ProjectsData[]>([]); 
+const internalData = ref<ProjectsData[]>([]);
 
 // 内部维护分页
 const pagination = reactive({
   currentPage: 1,
-  pageSize: 10
+  pageSize: 10,
 });
 
 const displayData = computed<ProjectsData[]>(() => {
@@ -81,7 +93,8 @@ const handleQuery = async (params?: ProjectsQuery) => {
   try {
     const res = await ProjectsAPI.getList(params || {});
     // 兼容后端返回结构
-    const rawData = res.data?.data?.items || (Array.isArray(res.data.data) ? res.data.data : []) || [];  
+    const rawData =
+      res.data?.data?.items || (Array.isArray(res.data.data) ? res.data.data : []) || [];
     internalData.value = rawData;
   } catch (error) {
     console.error("获取项目数据失败:", error);
@@ -92,15 +105,18 @@ const handleQuery = async (params?: ProjectsQuery) => {
 };
 
 // 监听抽屉打开，自动刷新数据
-watch(() => props.drawerVisible, (val) => {
-  if (val) {
-    handleQuery();
+watch(
+  () => props.drawerVisible,
+  (val) => {
+    if (val) {
+      handleQuery();
+    }
   }
-});
+);
 
 // 暴露刷新方法
-defineExpose({ 
-  handleQuery 
+defineExpose({
+  handleQuery,
 });
 
 onMounted(() => {
@@ -109,9 +125,9 @@ onMounted(() => {
 });
 
 const handleRowClick = (row: ProjectsData) => {
-  emit('row-click', row);
+  emit("row-click", row);
   // 选择后自动关闭抽屉
-  emit('update:drawerVisible', false);
+  emit("update:drawerVisible", false);
 };
 </script>
 

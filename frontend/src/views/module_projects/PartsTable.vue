@@ -1,7 +1,7 @@
 <template>
-  <div class="parts-table" v-loading="loading">
-    <MiddleTable 
-      v-bind="$attrs" 
+  <div v-loading="loading" class="parts-table">
+    <MiddleTable
+      v-bind="$attrs"
       :data="displayData"
       row-key="wtcode"
       :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
@@ -11,7 +11,7 @@
       @update:page-size="handleSizeUpdate"
     >
       <template #append-columns="{ formatWtCode }">
-        <el-table-column type="selection" fixed min-width="20" align="center" />        
+        <el-table-column type="selection" fixed min-width="20" align="center" />
         <el-table-column label="万通码" prop="wtcode" min-width="100" show-overflow-tooltip>
           <template #default="{ row }">
             <span class="wtcode-text">{{ formatWtCode(row.wtcode) }}</span>
@@ -20,7 +20,13 @@
         <el-table-column label="代号" prop="code" min-width="110" show-overflow-tooltip />
         <el-table-column label="名称" prop="spec" min-width="100" show-overflow-tooltip />
         <el-table-column label="数量" prop="count" min-width="40" align="center" />
-        <el-table-column label="材料" prop="material" min-width="120" show-overflow-tooltip align="center" />
+        <el-table-column
+          label="材料"
+          prop="material"
+          min-width="120"
+          show-overflow-tooltip
+          align="center"
+        />
         <el-table-column label="单重" prop="unit_mass" min-width="60" align="center" />
         <el-table-column label="总重" prop="total_mass" min-width="70" align="center" />
         <el-table-column label="备注" prop="remark" min-width="80" show-overflow-tooltip />
@@ -42,7 +48,7 @@ defineOptions({
 
 interface Props {
   data?: PartsData[];
-  queryParams?: PartsQuery; 
+  queryParams?: PartsQuery;
   currentPage?: number;
   pageSize?: number;
 }
@@ -54,9 +60,9 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<{
-  (e: 'update:currentPage', val: number): void;
-  (e: 'update:pageSize', val: number): void;
-  (e: 'load-data', val: any[]): void; 
+  (e: "update:currentPage", val: number): void;
+  (e: "update:pageSize", val: number): void;
+  (e: "load-data", val: any[]): void;
 }>();
 
 // --- 4. 内部状态管理 ---
@@ -74,7 +80,7 @@ const displayData = computed<PartsData[]>(() => {
   if (!Array.isArray(internalData.value)) {
     return [];
   }
-  return listToTree([...internalData.value]); 
+  return listToTree([...internalData.value]);
 });
 
 /**
@@ -85,8 +91,9 @@ const handleQuery = async (params?: PartsQuery) => {
   loading.value = true;
   try {
     const res = await PartsAPI.getList(params || {});
-    internalData.value = res.data?.data?.items || (Array.isArray(res.data.data) ? res.data.data : []) || [];    
-    emit('load-data', internalData.value); // 加载成功后向外抛出事件
+    internalData.value =
+      res.data?.data?.items || (Array.isArray(res.data.data) ? res.data.data : []) || [];
+    emit("load-data", internalData.value); // 加载成功后向外抛出事件
   } catch (error) {
     console.error("获取零件数据失败:", error);
     internalData.value = [];
@@ -100,7 +107,9 @@ const listToTree = (data: any[]) => {
   const map: Record<string, any> = {};
   const roots: any[] = [];
   data.sort((a, b) => a.wtcode.length - b.wtcode.length || a.wtcode.localeCompare(b.wtcode));
-  data.forEach((item) => { map[item.wtcode] = { ...item, children: [] }; });
+  data.forEach((item) => {
+    map[item.wtcode] = { ...item, children: [] };
+  });
   data.forEach((item) => {
     const node = map[item.wtcode];
     const lastDotIndex = item.wtcode.lastIndexOf(".");
@@ -118,20 +127,17 @@ const listToTree = (data: any[]) => {
   return roots;
 };
 
-const handlePageUpdate = (val: number) => emit('update:currentPage', val);
-const handleSizeUpdate = (val: number) => emit('update:pageSize', val);
+const handlePageUpdate = (val: number) => emit("update:currentPage", val);
+const handleSizeUpdate = (val: number) => emit("update:pageSize", val);
 
 // 暴露刷新方法给父组件
-defineExpose({ 
+defineExpose({
   handleQuery,
-  listToTree
+  listToTree,
 });
-
 </script>
 
-
 <style scoped>
-
 .parts-table {
   flex: 1;
   width: 100%;

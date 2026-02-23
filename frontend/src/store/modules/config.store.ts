@@ -36,7 +36,7 @@ export const useConfigStore = defineStore("config", {
   actions: {
     async getConfig() {
       if (loadingPromise) return loadingPromise;
-      
+
       loadingPromise = (async () => {
         try {
           const response = await ParamsAPI.getInitConfig();

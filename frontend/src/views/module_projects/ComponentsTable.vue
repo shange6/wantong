@@ -1,15 +1,15 @@
 <template>
-  <div class="components-table" v-loading="loading">
-    <MiddleTable 
-      v-bind="$attrs" 
-      :data="displayData" 
+  <div v-loading="loading" class="components-table">
+    <MiddleTable
+      v-bind="$attrs"
+      :data="displayData"
       :current-page="currentPage"
       :page-size="pageSize"
       @update:current-page="handlePageUpdate"
       @update:page-size="handleSizeUpdate"
     >
       <template #append-columns="{ formatWtCode }">
-        <el-table-column type="selection" fixed min-width="20" align="center" />        
+        <el-table-column type="selection" fixed min-width="20" align="center" />
         <el-table-column label="万通码" prop="wtcode" min-width="100" show-overflow-tooltip>
           <template #default="{ row }">
             <span class="wtcode-text">{{ formatWtCode(row.wtcode) }}</span>
@@ -18,7 +18,13 @@
         <el-table-column label="代号" prop="code" min-width="110" show-overflow-tooltip />
         <el-table-column label="名称" prop="spec" min-width="100" show-overflow-tooltip />
         <el-table-column label="数量" prop="count" min-width="40" align="center" />
-        <el-table-column label="材料" prop="material" min-width="120" show-overflow-tooltip align="center" />
+        <el-table-column
+          label="材料"
+          prop="material"
+          min-width="120"
+          show-overflow-tooltip
+          align="center"
+        />
         <el-table-column label="单重" prop="unit_mass" min-width="60" align="center" />
         <el-table-column label="总重" prop="total_mass" min-width="70" align="center" />
         <el-table-column label="备注" prop="remark" min-width="80" show-overflow-tooltip />
@@ -31,7 +37,10 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import MiddleTable from "./MiddleTable.vue";
-import ComponentsAPI, { type ComponentsData, type ComponentsQuery } from "@/api/module_projects/components";
+import ComponentsAPI, {
+  type ComponentsData,
+  type ComponentsQuery,
+} from "@/api/module_projects/components";
 
 defineOptions({
   name: "ComponentsTable",
@@ -40,7 +49,7 @@ defineOptions({
 
 interface Props {
   data?: ComponentsData[];
-  queryParams?: ComponentsQuery; 
+  queryParams?: ComponentsQuery;
   currentPage?: number;
   pageSize?: number;
 }
@@ -52,11 +61,10 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<{
-  (e: 'update:currentPage', val: number): void;
-  (e: 'update:pageSize', val: number): void;
-  (e: 'load-data', data: ComponentsData[]): void;
+  (e: "update:currentPage", val: number): void;
+  (e: "update:pageSize", val: number): void;
+  (e: "load-data", data: ComponentsData[]): void;
 }>();
-
 
 // --- 状态管理 ---
 const loading = ref<boolean>(false);
@@ -78,8 +86,9 @@ const handleQuery = async (params?: ComponentsQuery) => {
   loading.value = true;
   try {
     const res = await ComponentsAPI.getList(params || {});
-    internalData.value = res.data?.data?.items || (Array.isArray(res.data.data) ? res.data.data : []) || [];
-    emit('load-data', internalData.value);    
+    internalData.value =
+      res.data?.data?.items || (Array.isArray(res.data.data) ? res.data.data : []) || [];
+    emit("load-data", internalData.value);
   } catch (error) {
     console.error("获取部件数据失败:", error);
     internalData.value = [];
@@ -89,18 +98,16 @@ const handleQuery = async (params?: ComponentsQuery) => {
 };
 
 // 事件转发逻辑
-const handlePageUpdate = (val: number) => emit('update:currentPage', val);
-const handleSizeUpdate = (val: number) => emit('update:pageSize', val);
+const handlePageUpdate = (val: number) => emit("update:currentPage", val);
+const handleSizeUpdate = (val: number) => emit("update:pageSize", val);
 
 // 暴露刷新方法给父组件
-defineExpose({ 
-  handleQuery 
+defineExpose({
+  handleQuery,
 });
-
 </script>
 
 <style scoped>
-
 .components-table {
   flex: 1;
   width: 100%;
@@ -109,5 +116,4 @@ defineExpose({
   flex-direction: column;
   overflow: hidden;
 }
-
 </style>

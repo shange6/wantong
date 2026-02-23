@@ -10,14 +10,14 @@
 
     <ProjectsTable
       ref="projectTableRef"
-      :data="displayData"
-      :currentPage="pagination.currentPage"
-      :pageSize="pagination.pageSize"
       v-model:drawer-visible="projectDrawerVisible"
+      :data="displayData"
+      :current-page="pagination.currentPage"
+      :page-size="pagination.pageSize"
       @row-click="handleProjectRowClick"
-      @load-data="handleTableLoad" 
-      @update:currentPage="(val) => pagination.currentPage = val"
-      @update:pageSize="(val) => pagination.pageSize = val"
+      @load-data="handleTableLoad"
+      @update:current-page="(val) => (pagination.currentPage = val)"
+      @update:page-size="(val) => (pagination.pageSize = val)"
     />
   </div>
 </template>
@@ -37,14 +37,14 @@ const projectTableRef = ref(); // 修正：与模板中的 ref 一致
 const projectDrawerVisible = ref(false);
 
 // 原始数据底稿（供 SearchForm 过滤用）
-const allTableData = ref<any[]>([]); 
+const allTableData = ref<any[]>([]);
 // 过滤后的展示数据
 const filteredData = ref<any[] | null>(null);
 
 // 分页状态（必须在父组件管理，否则分页点击无效）
 const pagination = reactive({
   currentPage: 1,
-  pageSize: 10
+  pageSize: 10,
 });
 
 // 查询参数
@@ -95,8 +95,6 @@ function handleProjectRowClick(row: any) {
   // 如果需要点击后重新请求后端：
   projectTableRef.value?.handleQuery?.();
 }
-
-
 </script>
 
 <style scoped>
@@ -108,5 +106,4 @@ function handleProjectRowClick(row: any) {
   flex-direction: column;
   overflow: hidden;
 }
-
 </style>

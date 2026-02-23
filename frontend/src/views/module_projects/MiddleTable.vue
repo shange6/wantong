@@ -1,17 +1,12 @@
 <template>
   <div class="middle-card-wrapper">
     <BaseCard v-bind="filterOtherAttrs" :data="displayData" @row-click="handleRowClick">
-      
       <template #function-area>
         <slot name="function-area"></slot>
       </template>
 
       <template #append-columns="slotProps">
-        <slot 
-          name="append-columns" 
-          v-bind="slotProps || {}" 
-          :formatWtCode="formatWtCode" 
-        ></slot>
+        <slot name="append-columns" v-bind="slotProps || {}" :format-wt-code="formatWtCode"></slot>
       </template>
 
       <template #pagination-area>
@@ -37,7 +32,7 @@ import { useAttrs, computed } from "vue";
 import BaseCard from "./BaseCard.vue";
 
 interface Props {
-  data?: any[]; 
+  data?: any[];
   currentPage?: number;
   pageSize?: number;
 }
@@ -56,14 +51,14 @@ const fullData = computed(() => {
 // 【新增】显式定义插槽类型
 const slots = defineSlots<{
   // 这里的名字必须和模板中 <slot name=\"...\"> 的名字完全一致
-  'append-columns'(props: { formatWtCode: (code?: string) => string }): any;
-  'function-area'(props: {}): any;
+  "append-columns"(props: { formatWtCode: (code?: string) => string }): any;
+  "function-area"(props: {}): any;
 }>();
 
 const emit = defineEmits<{
-  (e: 'update:currentPage', val: number): void;
-  (e: 'update:pageSize', val: number): void;
-  (e: 'row-click', row: any): void; // 声明行点击事件给父组件
+  (e: "update:currentPage", val: number): void;
+  (e: "update:pageSize", val: number): void;
+  (e: "row-click", row: any): void; // 声明行点击事件给父组件
 }>();
 
 defineOptions({
@@ -78,20 +73,20 @@ const displayData = computed(() => {
   // 简单的 slice 分页会破坏树结构（如果父节点在上一页，子节点在下一页，则无法展开）。
   // 暂时保留切片逻辑，但如果需要树形折叠，必须一次性给 el-table 所有数据，
   // 或者自行实现“树形分页”算法。
-  
+
   // 检查是否传入了 row-key（作为树形数据的特征之一）
-  if (attrs['row-key']) {
+  if (attrs["row-key"]) {
     return data; // 如果是树形表，直接返回全量数据，交给 el-table 自身处理（或者不分页）
   }
 
   const start = (props.currentPage - 1) * props.pageSize;
   const end = start + props.pageSize;
-  return data.slice(start, end); 
+  return data.slice(start, end);
 });
 
-const handleCurrentPageUpdate = (val: number) => emit('update:currentPage', val);
-const handlePageSizeUpdate = (val: number) => emit('update:pageSize', val);
-const handleRowClick = (row: any) => emit('row-click', row);
+const handleCurrentPageUpdate = (val: number) => emit("update:currentPage", val);
+const handlePageSizeUpdate = (val: number) => emit("update:pageSize", val);
+const handleRowClick = (row: any) => emit("row-click", row);
 
 /**
  * 格式化函数：依然保留在子组件，但通过插槽暴露给父组件使用
@@ -107,15 +102,13 @@ const attrs = useAttrs();
 const filterOtherAttrs = computed(() => {
   const result = { ...attrs };
   // 这里的删除逻辑已经足够，无需依赖 useTableAttrs 的二次处理
-  const toDelete = ['data', 'currentPage', 'pageSize', 'class', 'style'];
-  toDelete.forEach(key => delete result[key]);
+  const toDelete = ["data", "currentPage", "pageSize", "class", "style"];
+  toDelete.forEach((key) => delete result[key]);
   return result;
 });
-
 </script>
 
 <style scoped>
-
 .middle-card-wrapper {
   flex: 1;
   width: 100%;
@@ -130,5 +123,4 @@ const filterOtherAttrs = computed(() => {
   margin-right: 12px;
   justify-content: flex-end;
 }
-
 </style>

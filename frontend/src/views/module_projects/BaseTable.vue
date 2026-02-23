@@ -16,7 +16,6 @@
 </template>
 
 <script setup lang="ts">
-
 defineOptions({
   name: "BaseTable",
   inheritAttrs: false, // 禁止属性自动挂载到根 div 上
@@ -33,28 +32,53 @@ const filterTableAttrs = computed(() => filterElTableAttrs(attrs));
 function filterElTableAttrs(attrs: Record<string, any>): Record<string, any> {
   // Element Plus el-table 官方属性白名单
   const elTablePropKeys = [
-    'data', 'size', 'width', 'height', 'max-height', 'fit', 'stripe', 
-    'border', 'row-key', 'context', 'show-header', 'show-summary', 
-    'sum-text', 'summary-method', 'row-class-name', 'row-style', 
-    'cell-class-name', 'cell-style', 'header-row-class-name', 
-    'header-row-style', 'header-cell-class-name', 'tree-props',
-    'default-expand-all', 'expand-row-keys', 'default-sort', 'tooltip-effect',
-    'select-on-indeterminante', 'indent', 'lazy', 'load', 'scrollbar-always-on'
+    "data",
+    "size",
+    "width",
+    "height",
+    "max-height",
+    "fit",
+    "stripe",
+    "border",
+    "row-key",
+    "context",
+    "show-header",
+    "show-summary",
+    "sum-text",
+    "summary-method",
+    "row-class-name",
+    "row-style",
+    "cell-class-name",
+    "cell-style",
+    "header-row-class-name",
+    "header-row-style",
+    "header-cell-class-name",
+    "tree-props",
+    "default-expand-all",
+    "expand-row-keys",
+    "default-sort",
+    "tooltip-effect",
+    "select-on-indeterminante",
+    "indent",
+    "lazy",
+    "load",
+    "scrollbar-always-on",
   ];
 
-  return Object.keys(attrs).reduce((acc, key) => {
-    // 逻辑：如果在白名单内，或者是以 'on' 开头的事件监听器，则保留
-    if (elTablePropKeys.includes(key) || key.startsWith('on')) {
-      acc[key] = attrs[key];
-    }
-    return acc;
-  }, {} as Record<string, any>);
+  return Object.keys(attrs).reduce(
+    (acc, key) => {
+      // 逻辑：如果在白名单内，或者是以 'on' 开头的事件监听器，则保留
+      if (elTablePropKeys.includes(key) || key.startsWith("on")) {
+        acc[key] = attrs[key];
+      }
+      return acc;
+    },
+    {} as Record<string, any>
+  );
 }
-
 </script>
 
 <style scoped>
-
 .base-table-wrapper {
   flex: 1;
   width: 100%;
@@ -63,5 +87,4 @@ function filterElTableAttrs(attrs: Record<string, any>): Record<string, any> {
   overflow: hidden;
   flex-direction: column;
 }
-
 </style>

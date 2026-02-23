@@ -167,9 +167,10 @@ def get_project_info(doc) -> dict:
     project_info_bak = None     # 项目信息备份，用于与第二个项目信息进行比对
     project_info_keys = ["项目名称", "合同号", "部件名称", "数量"]
     mtexts = doc.modelspace().query("MTEXT")
-    project_info["文件数量"] = len(mtexts)  # 获取页数统计，与其他页数对比
     for mtext in mtexts:        # 获取真正的text文字，进行空格分隔
         for text in replace_sub(mtext.dxf.text).split():
+            if "项目名称" in text:
+                project_info["文件数量"] = project_info.get("文件数量", 0) + 1  # 获取页数统计，与其他页数对比
             check_text(None, text, project_info, project_info_keys)
         if project_info_bak:    # 如果project_info_bak是有值的，也就说不是第一次循环
             if project_info_bak != project_info:
@@ -240,8 +241,8 @@ def dxf2dict(dxf_path: str) -> dict:
     dxf_data.update({"data": dxf_data_list})
     dxf_data["零件数量"] =  len(dxf_data_list)
     project_info = get_project_info(doc)
-    if project_info["文件数量"] != dxf_data["文件个数"]:
-        msg = f"错误！！！表格个数❌ {project_info['文件数量']} != {dxf_data['文件个数']}"
+    if project_info.get("文件数量", 0) != dxf_data.get("文件个数", 0):
+        msg = f"错误！！！表格个数❌ {project_info.get('文件数量', 0)} != {dxf_data.get('文件个数', 0)}"
         dxf_data["info"].append(msg)
         print(msg)
     dxf_data.update(project_info)
@@ -258,11 +259,12 @@ if __name__ == "__main__":
     # dwg_path =  r"c:\users\panzheng\desktop\1\1.dwg"
     # dxf_path =dwg2dxf(dwg_path)
     # dxf_path = "/mnt/c/Users/panzheng/Desktop/1/1.dxf"
-    dxf_path = r"c:\users\panzheng\desktop\1\2.dxf"
+    dxf_path = r"c:\users\panzheng\desktop\1\upload_.dxf"
     dxf_data = dxf2dict(dxf_path)
     for item in dxf_data:
         if item == "data":
             for i in dxf_data[item]:
-                print(i)
+                # print(i)
+                pass
         else:
             print(item, dxf_data[item])

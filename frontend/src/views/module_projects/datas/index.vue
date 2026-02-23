@@ -2,8 +2,8 @@
 <template>
   <div class="app-container">
     <!-- 搜索区域 -->
-    <SearchForm 
-      v-model:modelValue="queryFormData" 
+    <SearchForm
+      v-model:model-value="queryFormData"
       :source-data="tableSourceData?.data || []"
       :show-no="false"
       @update="handleUpdate"
@@ -14,9 +14,9 @@
           v-hasPerm="['module_projects:parts:query']"
           type="warning"
           icon="refresh"
-          @click="isShow=!isShow"
+          @click="isShow = !isShow"
         >
-          {{ isShow ? '切换零件' : '切换组件' }}
+          {{ isShow ? "切换零件" : "切换组件" }}
         </el-button>
         <el-button
           v-hasPerm="['module_projects:datas:create']"
@@ -37,13 +37,12 @@
         </el-button>
       </template>
     </SearchForm>
-    
 
-    <!-- 内容区域 -->     
+    <!-- 内容区域 -->
     <PartsTable v-show="!isShow" :data="pageTableData" />
 
     <!-- 空数据时显示上传组件 -->
-     <el-row v-show="isShow" :gutter="20">
+    <el-row v-show="isShow" :gutter="20">
       <el-col :span="8">
         <el-card class="upload-card">
           <div class="upload-wrapper">
@@ -58,13 +57,14 @@
               :show-file-list="false"
               :on-exceed="handleExceed"
               :http-request="handleHttpRequest"
-              style="max-width: 500px;"          
+              style="max-width: 500px"
             >
               <el-icon class="el-icon--upload" style="color: var(--el-color-primary)">
                 <UploadFilled />
               </el-icon>
               <div class="el-upload__text">
-                拖拽文件到此处或 <em>点击上传</em>
+                拖拽文件到此处或
+                <em>点击上传</em>
               </div>
             </el-upload>
           </div>
@@ -73,39 +73,39 @@
       <el-col :span="16">
         <el-card class="report-card">
           <div class="report-header">文件解析结果</div>
-          <div class="report-grid">      
+          <div class="report-grid">
             <el-row class="grid-row">
               <el-col :span="18" class="col-item">
                 <div class="grid-label">项目名称</div>
-                <div class="grid-content">{{ uploadResult.projectName || '--' }}</div>
-              </el-col> 
+                <div class="grid-content">{{ uploadResult.projectName || "--" }}</div>
+              </el-col>
               <el-col :span="6" class="col-item">
-                  <div class="grid-label border-left">零件数量</div>
-                  <div class="grid-content">{{ uploadResult.partCount || '--' }}</div>
-                </el-col>
+                <div class="grid-label border-left">零件数量</div>
+                <div class="grid-content">{{ uploadResult.partCount || "--" }}</div>
+              </el-col>
             </el-row>
             <el-row class="grid-row">
               <el-col :span="18" class="col-item">
                 <div class="grid-label">部件名称</div>
-                <div class="grid-content">{{ uploadResult.componentName || '--' }}</div>
-              </el-col> 
+                <div class="grid-content">{{ uploadResult.componentName || "--" }}</div>
+              </el-col>
               <el-col :span="6" class="col-item">
-                  <div class="grid-label border-left">文件数量</div>
-                  <div class="grid-content">{{ uploadResult.pageCount || '--' }}</div>
-                </el-col>
+                <div class="grid-label border-left">文件数量</div>
+                <div class="grid-content">{{ uploadResult.pageCount || "--" }}</div>
+              </el-col>
             </el-row>
             <el-row class="grid-row no-border">
               <el-col :span="9" class="col-item">
                 <div class="grid-label">部件编号</div>
-                <div class="grid-content">{{ uploadResult.componentCode || '--' }}</div>
+                <div class="grid-content">{{ uploadResult.componentCode || "--" }}</div>
               </el-col>
               <el-col :span="9" class="col-item border-right">
-                  <div class="grid-label border-left">合同编号</div>
-                  <div class="grid-content">{{ uploadResult.contractNo || '--' }}</div>
-                </el-col>
+                <div class="grid-label border-left">合同编号</div>
+                <div class="grid-content">{{ uploadResult.contractNo || "--" }}</div>
+              </el-col>
               <el-col :span="6" class="col-item">
                 <div class="grid-label border-left">部件数量</div>
-                <div class="grid-content">{{ uploadResult.componentCount || '--' }}</div>
+                <div class="grid-content">{{ uploadResult.componentCount || "--" }}</div>
               </el-col>
             </el-row>
           </div>
@@ -119,9 +119,9 @@
           <span>详细解析日志</span>
         </div>
       </template>
-      <div 
-        v-for="(text, index) in tableSourceData?.info" 
-        :key="index" 
+      <div
+        v-for="(text, index) in tableSourceData?.info"
+        :key="index"
         class="text-line"
         :style="{ fontSize: '15px', color: getLogColor(text) }"
       >
@@ -132,20 +132,19 @@
 </template>
 
 <script setup lang="ts">
-
 defineOptions({
   name: "Datas",
   inheritAttrs: false,
 });
 
-import SearchForm from '../SearchForm.vue';
+import SearchForm from "../SearchForm.vue";
 import { useAppStore } from "@/store/modules/app.store";
 import { useUserStore } from "@/store/modules/user.store";
 import DatasAPI, { DatasPageQuery, UploadInnerData } from "@/api/module_projects/datas";
-import ComponentsTable from '../ComponentsTable.vue';
+import ComponentsTable from "../ComponentsTable.vue";
 // import { ComponentsData } from "@/api/module_projects/components";
-import PartsTable from '../PartsTable.vue';
-import PartsAPI, { PartsData } from '@/api/module_projects/parts';
+import PartsTable from "../PartsTable.vue";
+import PartsAPI, { PartsData } from "@/api/module_projects/parts";
 
 const queryFormRef = ref();
 const dataTableRef = ref();
@@ -163,16 +162,19 @@ const pageTableData = ref<PartsData[] | any[]>([]);
 const tableSourceData = ref<UploadInnerData>();
 
 // 是否显示上传组件，文件解析结果和日志
-const isShow = ref(true)
+const isShow = ref(true);
 
 // 根据文本内容返回对应的颜色类名或直接返回颜色值
 const getLogColor = (text: string) => {
-  if (text.includes('错误')) {  return "var(--el-color-primary)"; }
+  if (text.includes("错误")) {
+    return "var(--el-color-primary)";
+  }
 };
 
 // 更新表格数据
 const handleUpdate = (val: any[]) => {
-  pageTableData.value = val;
+  const next = Array.isArray(val) ? val : [];
+  pageTableData.value = flattenTree(next);
 };
 
 //  递归排序：同时处理当前层级及所有子节点的万通码排序
@@ -183,11 +185,11 @@ const sortTableTree = (items: any[]) => {
   items.sort((a, b) => {
     const strA = String(a.wtcode || "");
     const strB = String(b.wtcode || "");
-    return strA.localeCompare(strB, undefined, { numeric: true, sensitivity: 'base' });
+    return strA.localeCompare(strB, undefined, { numeric: true, sensitivity: "base" });
   });
 
   // 2. 递归处理子节点
-  items.forEach(item => {
+  items.forEach((item) => {
     if (item.children && item.children.length > 0) {
       sortTableTree(item.children);
     }
@@ -231,14 +233,14 @@ const filterTreeData = (nodes: any[], query: DatasPageQuery): any[] => {
     .map((node) => {
       // 1. 先递归处理子节点
       const filteredChildren = node.children ? filterTreeData(node.children, query) : [];
-      
+
       // 2. 检查当前节点是否匹配
       const nCode = String(node.code || "").toLowerCase();
       const nSpec = String(node.spec || "").toLowerCase();
       const nMaterial = String(node.material || "").toLowerCase();
       const nRemark = String(node.remark || "").toLowerCase();
 
-      const isSelfMatch = 
+      const isSelfMatch =
         (!qCode || nCode.includes(qCode)) &&
         (!qSpec || nSpec.includes(qSpec)) &&
         (!qMaterial || nMaterial.includes(qMaterial) || nRemark.includes(qMaterial));
@@ -252,48 +254,17 @@ const filterTreeData = (nodes: any[], query: DatasPageQuery): any[] => {
     .filter((node): node is any => node !== null); // 4. 过滤掉不匹配的项
 };
 
-// 查询（前端过滤）
-async function handleQuery() {
-  loading.value = true;
-  try {
-    const sourceData = tableSourceData.value?.data || [];
-    
-    // 如果没有源数据，清空表格
-    if (sourceData.length === 0) {
-      pageTableData.value = [];
-      total.value = 0;
-      return;
-    }
-
-    // 1. 过滤
-    const filtered = filterTreeData(sourceData, queryFormData);
-    
-    // 2. 排序
-    sortTableTree(filtered);
-    
-    pageTableData.value = filtered;
-    total.value = filtered.length;
-    
-    // 如果有筛选结果，切换到表格视图
-    if (filtered.length > 0 && !isShow.value) {
-      isShow.value = false;
-    }
-  } finally {
-    loading.value = false;
-  }
-}
-
 // 重置查询
 async function handleResetQuery() {
   // 1. 清空查询对象：使用 keyof 确保索引安全
-  (Object.keys(queryFormData) as (keyof typeof queryFormData)[]).forEach(key => {
+  (Object.keys(queryFormData) as (keyof typeof queryFormData)[]).forEach((key) => {
     queryFormData[key] = undefined;
   });
 
   // 2. 恢复全量数据
   const sourceData = tableSourceData.value?.data || [];
   pageTableData.value = [...sourceData];
-  
+
   // 3. 排序（SearchForm 内部其实也有排序逻辑，这里保持一致即可）
   sortTableTree(pageTableData.value);
 }
@@ -304,46 +275,40 @@ async function handleSelectionChange(selection: any) {
 }
 
 async function deleteData() {
-    // 1. 销毁原始数据源对象
-    tableSourceData.value = undefined;
-    // 2. 清空当前显示的表格数据
-    pageTableData.value = [];
-    total.value = 0;
-    // 3. 重置解析结果面板
-    Object.assign(uploadResult, {
-      projectName: "",
-      contractNo: "",
-      componentName: "",
-      componentCode: "",
-      componentCount: "",
-      partCount: "",
-      pageCount: "",
-    });
-    // 4. 重置查询表单
-    queryFormRef.value?.resetFields();
-    // 5. 隐藏数据表，显示上传组件
-    isShow.value = true;
+  // 1. 销毁原始数据源对象
+  tableSourceData.value = undefined;
+  // 2. 清空当前显示的表格数据
+  pageTableData.value = [];
+  total.value = 0;
+  // 3. 重置解析结果面板
+  Object.assign(uploadResult, {
+    projectName: "",
+    contractNo: "",
+    componentName: "",
+    componentCode: "",
+    componentCount: "",
+    partCount: "",
+    pageCount: "",
+  });
+  // 4. 重置查询表单
+  queryFormRef.value?.resetFields();
+  // 5. 隐藏数据表，显示上传组件
+  isShow.value = true;
 }
 
 // 放弃当前数据：销毁对象、清空表格、切换视图
 async function handleDelete() {
-
   try {
     // 1. 二次确认，防止误操作
-    await ElMessageBox.confirm(
-      "确定要放弃当前解析的数据吗？未保存的数据将会丢失。",
-      "警告",
-      {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
-      }
-    );
+    await ElMessageBox.confirm("确定要放弃当前解析的数据吗？未保存的数据将会丢失。", "警告", {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      type: "warning",
+    });
     // 2. 执行删除操作
     await deleteData();
     // 3. 提示用户操作成功
     ElMessage.success("已放弃当前数据");
-
   } catch (error) {
     // 用户取消操作，不做处理
   }
@@ -352,7 +317,7 @@ async function handleDelete() {
 //  树转平级数组函数
 const flattenTree = (tree: any[]): any[] => {
   let result: any[] = [];
-  tree.forEach(node => {
+  tree.forEach((node) => {
     // 解构：提取出数据，剔除 children
     const { children, ...itemData } = node;
     result.push(itemData);
@@ -372,10 +337,10 @@ async function handleSaveToDB() {
 
   try {
     await ElMessageBox.confirm("确认将当前解析结果保存至数据库？", "操作确认", {
-      type: 'success',
-      confirmButtonText: '立即保存'
+      type: "success",
+      confirmButtonText: "立即保存",
     });
-    
+
     loading.value = true;
 
     // 1. 获取扁平化后的数据
@@ -385,12 +350,15 @@ async function handleSaveToDB() {
     const payload = {
       // 这里的字段名（如 project_name）建议根据后端文档调整
       projects: {
-        code: uploadResult.componentCode.substring(0, uploadResult.componentCode.lastIndexOf('.')),
+        code: uploadResult.componentCode.substring(0, uploadResult.componentCode.lastIndexOf(".")),
         name: uploadResult.projectName,
         no: uploadResult.contractNo,
       },
       components: {
-        project_code: uploadResult.componentCode.substring(0, uploadResult.componentCode.lastIndexOf('.')),
+        project_code: uploadResult.componentCode.substring(
+          0,
+          uploadResult.componentCode.lastIndexOf(".")
+        ),
         wtcode: flatDetails[0]["wtcode"],
         code: flatDetails[0]["code"],
         spec: flatDetails[0]["spec"],
@@ -400,17 +368,16 @@ async function handleSaveToDB() {
         total_mass: flatDetails[0]["total_mass"],
         remark: flatDetails[0]["remark"],
       },
-      parts: flatDetails
+      parts: flatDetails,
     };
     if (payload.components.project_code.includes(".")) {
       throw new Error("导入数据必须是部件，不能是组件或零件");
-    }else{
+    } else {
       // 3. 提交
       const res = await DatasAPI.saveDatas(payload);
     }
-    
   } catch (error: any) {
-    if (error !== 'cancel') {
+    if (error !== "cancel") {
       ElMessage.error(error.message || "保存失败");
     }
   } finally {
@@ -421,22 +388,22 @@ async function handleSaveToDB() {
 // 当用户选择新文件上传时，直接替换掉旧的
 function handleExceed(files: File[]) {
   // 清除组件内部状态
-  uploadRef.value!.clearFiles(); 
+  uploadRef.value!.clearFiles();
   const file = files[0] as any;
   file.uid = "upload_"; // 固定UID
-  uploadRef.value!.handleStart(file); 
+  uploadRef.value!.handleStart(file);
   // 立即触发 http-request
-  uploadRef.value!.submit(); 
+  uploadRef.value!.submit();
 }
 
 // 执行上传函数
 async function handleHttpRequest(options: any) {
   try {
-    uploading.value = true;    
+    uploading.value = true;
     // 1. 准备后端需要的 FormData
     const formData = new FormData();
     // 注意：'file' 必须和后端 FastAPI 定义的参数名一致
-    formData.append("file", options.file);    
+    formData.append("file", options.file);
     // 2. 路径处理（如果有的话）
     const targetPath = currentPath.value === "/" ? "" : currentPath.value;
     formData.append("target_path", targetPath);
@@ -445,25 +412,25 @@ async function handleHttpRequest(options: any) {
     // 4. 直接取值（无任何判断，直接拿后端返回的表格数组）
     tableSourceData.value = res.data.data;
     // 5. 将后端返回的提示信息绑定到 el-alert
-    const { 项目名称, 合同号, 部件名称, 部件编号, 数量, 文件个数, 零件数量 } = res.data?.data ?? {}
-    uploadResult.projectName = 项目名称 ?? '';
-    uploadResult.contractNo = 合同号 ?? '';
-    uploadResult.componentName = 部件名称 ?? '';
-    uploadResult.componentCode = 部件编号 ?? '';
-    uploadResult.componentCount = 数量 ?? '';
-    uploadResult.pageCount = String(文件个数) ?? '';
-    uploadResult.partCount = String(零件数量) ?? '';
+    const { 项目名称, 合同号, 部件名称, 部件编号, 数量, 文件个数, 零件数量 } = res.data?.data ?? {};
+    uploadResult.projectName = 项目名称 ?? "";
+    uploadResult.contractNo = 合同号 ?? "";
+    uploadResult.componentName = 部件名称 ?? "";
+    uploadResult.componentCode = 部件编号 ?? "";
+    uploadResult.componentCount = 数量 ?? "";
+    uploadResult.pageCount = String(文件个数) ?? "";
+    uploadResult.partCount = String(零件数量) ?? "";
     // 6. 直接将后端数据添加到表格（前置追加，保持原有顺序）
     const data = [...(tableSourceData.value?.data || [])];
     // 7. 执行递归排序
-    sortTableTree(data);
-    // 8. 赋值给分页数据
-    pageTableData.value = data as any[];
+    // sortTableTree(data);
+    // // 8. 赋值给分页数据
+    // console.log(data)
+    pageTableData.value = flattenTree(data);
     // 9. 更新表格总条数
     total.value = pageTableData.value.length;
     // 10. 自动切换到表格视图
     // isShow.value = false;
-
   } catch (error) {
     console.error("上传失败:", error);
   } finally {
@@ -471,11 +438,9 @@ async function handleHttpRequest(options: any) {
     uploading.value = false;
   }
 }
-
 </script>
 
 <style lang="scss" scoped>
-
 /* 卡片基础间距 */
 .upload-card,
 .report-card {
@@ -533,11 +498,12 @@ async function handleHttpRequest(options: any) {
 }
 
 /* 辅助功能类 */
-.border-left { border-left: 1px solid var(--el-border-color); }
+.border-left {
+  border-left: 1px solid var(--el-border-color);
+}
 .info-card {
   flex: 1;
   margin-top: 10px;
   overflow: auto;
 }
-
 </style>
