@@ -1,7 +1,7 @@
 import request from "@/utils/request";
 import { AxiosInterceptorManager } from "axios";
 
-const MODULE_API_PREFIX = "/orders/orders";
+const MODULE_API_PREFIX = "/orders/order";
 
 export interface OrdersFilter {
   wtcode?: string;
@@ -34,6 +34,15 @@ export interface OrdersPageQuery extends OrdersFilter {
 }
 
 class OrdersAPI {
+  static getUnOrdersList(params: OrdersPageQuery) {
+    // return request<any, { data: { items: OrdersData[]; total: number } }>({
+    return request({
+      url: `${MODULE_API_PREFIX}/unorderlist`,
+      method: "get",
+      params,
+    });
+  }
+
   static getList(params: OrdersPageQuery) {
     return request<any, { data: { items: OrdersData[]; total: number } }>({
       url: `${MODULE_API_PREFIX}/list`,

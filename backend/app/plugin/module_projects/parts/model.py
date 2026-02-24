@@ -13,12 +13,7 @@ class PartsModel(ModelMixin, UserMixin):
     __tablename__ = "projects_parts"
     __table_args__ = {"comment": "零件表"}
     
-    component_wtcode: Mapped[str] = mapped_column(
-        String(64), 
-        ForeignKey("projects_components.wtcode"), 
-        comment="部件万通码"
-    )
-    
+    component_wtcode: Mapped[str] = mapped_column(String(64), ForeignKey("projects_components.wtcode"), comment="部件万通码")    
     wtcode: Mapped[str] = mapped_column(String(64), unique=True, index=True, comment="万通码")
     code: Mapped[str | None] = mapped_column(String(64), comment="编码")
     spec: Mapped[str | None] = mapped_column(String(255), comment="规格")

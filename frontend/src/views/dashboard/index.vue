@@ -1,86 +1,5 @@
 <template>
   <div class="dashboard-container">
-    <!-- github 角标 -->
-    <GithubCorner class="github-corner" />
-
-    <el-card shadow="hover">
-      <div class="flex flex-wrap">
-        <!-- 左侧问候语区域 -->
-        <div class="flex-1 flex items-start">
-          <img
-            class="w80px h80px rounded-full"
-            :src="userStore.basicInfo.avatar + '?imageView2/1/w/80/h/80'"
-          />
-          <div class="ml-5">
-            <div class="text-20px font-bold mb-5px">
-              {{ timefix }}{{ userStore.basicInfo.name }}，{{ welcome }}
-            </div>
-            <p class="text-sm text-gray">今日天气晴朗，气温在15℃至25℃之间，东南风。</p>
-          </div>
-        </div>
-
-        <!-- 右侧图标区域 - PC端 -->
-        <div class="hidden sm:block">
-          <div class="flex items-end space-x-6">
-            <!-- 文档 -->
-            <div class="flex flex-col items-center">
-              <div class="font-bold color-#4080ff text-sm flex items-center">
-                <el-icon class="mr-2px"><Document /></el-icon>
-                文档
-              </div>
-              <div class="mt-3 whitespace-nowrap">
-                <el-link
-                  href="https://blog.csdn.net/weixin_46768253/article/details/149569141?spm=1001.2014.3001.5502"
-                  target="_blank"
-                >
-                  <div class="i-svg:csdn text-lg" />
-                </el-link>
-              </div>
-            </div>
-            <!-- 仓库 -->
-            <div class="flex flex-col items-center">
-              <div class="font-bold color-#ff9a2e text-sm flex items-center">
-                <el-icon class="mr-2px">
-                  <Folder />
-                </el-icon>
-                仓库
-              </div>
-              <div class="mt-3 whitespace-nowrap">
-                <el-link href="https://gitee.com/fastapiadmin/FastapiAdmin" target="_blank">
-                  <div class="i-svg:gitee text-lg color-#F76560" />
-                </el-link>
-                <el-divider direction="vertical" />
-                <el-link href="https://github.com/fastapiadmin/FastapiAdmin" target="_blank">
-                  <div class="i-svg:github text-lg color-#4080FF" />
-                </el-link>
-                <el-divider direction="vertical" />
-                <el-link href="https://gitcode.com/qq_36002987/FastapiAdmin" target="_blank">
-                  <div class="i-svg:gitcode text-lg color-#FF9A2E" />
-                </el-link>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 移动端图标区域 -->
-        <div class="w-full sm:hidden mt-3">
-          <div class="flex justify-end space-x-4 overflow-x-auto">
-            <!-- 仓库图标 -->
-            <el-link href="https://gitee.com/fastapiadmin/FastapiAdmin" target="_blank">
-              <div class="i-svg:gitee text-lg color-#F76560" />
-            </el-link>
-            <el-divider direction="vertical" />
-            <el-link href="https://github.com/fastapiadmin/FastapiAdmin" target="_blank">
-              <div class="i-svg:github text-lg color-#4080FF" />
-            </el-link>
-            <el-divider direction="vertical" />
-            <el-link href="https://gitcode.com/qq_36002987/FastapiAdmin" target="_blank">
-              <div class="i-svg:gitcode text-lg color-#FF9A2E" />
-            </el-link>
-          </div>
-        </div>
-      </div>
-    </el-card>
 
     <!-- 数据统计 -->
     <el-row :gutter="10" class="mt-4">
@@ -89,14 +8,14 @@
         <el-card shadow="hover" class="h-full flex flex-col">
           <template #header>
             <div class="flex-x-between">
-              <span class="text-gray">在线用户</span>
+              <span class="text-gray">待办事项</span>
               <el-tag type="danger" size="small">实时</el-tag>
             </div>
           </template>
 
           <div class="flex-x-between mt-2 flex-1">
             <div class="flex-y-center">
-              <span class="text-lg transition-all duration-300 hover:scale-110">9999</span>
+              <span class="text-lg transition-all duration-300 hover:scale-110">88</span>
               <span v-if="true" class="ml-2 text-xs text-[#67c23a]">
                 <el-icon>
                   <Connection />
@@ -115,7 +34,7 @@
 
           <div class="flex-x-between mt-2 text-sm text-gray">
             <span>更新时间</span>
-            <span>2025-07-12 00:00:00</span>
+            <span>2026-03-01 00:00:00</span>
           </div>
         </el-card>
       </el-col>
@@ -146,8 +65,8 @@
             <el-card shadow="hover" class="h-full flex flex-col">
               <template #header>
                 <div class="flex-x-between">
-                  <span class="text-gray">访客数(UV)</span>
-                  <el-tag type="success" size="small">日</el-tag>
+                  <span class="text-gray">已办事项</span>
+                  <el-tag type="success" size="small">个</el-tag>
                 </div>
               </template>
 
@@ -172,7 +91,7 @@
               </div>
 
               <div class="flex-x-between mt-2 text-sm text-gray">
-                <span>总访客数</span>
+                <span>零件总数</span>
                 <span>{{ Math.round(transitionTotalUvCount) }}</span>
               </div>
             </el-card>
@@ -206,7 +125,7 @@
             <el-card shadow="hover" class="h-full flex flex-col">
               <template #header>
                 <div class="flex-x-between">
-                  <span class="text-gray">浏览量(PV)</span>
+                  <span class="text-gray">过期事项</span>
                   <el-tag type="primary" size="small">日</el-tag>
                 </div>
               </template>
@@ -232,7 +151,7 @@
               </div>
 
               <div class="flex-x-between mt-2 text-sm text-gray">
-                <span>总浏览量</span>
+                <span>临近过期事项</span>
                 <span>{{ Math.round(transitionTotalPvCount) }}</span>
               </div>
             </el-card>
@@ -241,83 +160,6 @@
       </el-col>
     </el-row>
 
-    <el-row :gutter="10" class="mt-4">
-      <!-- 访问趋势统计图 -->
-      <el-col :xs="24" :span="16">
-        <el-card>
-          <template #header>
-            <div class="flex-x-between">
-              <span>访问趋势</span>
-              <el-radio-group v-model="visitTrendDateRange" size="small">
-                <el-radio-button :value="7">近7天</el-radio-button>
-                <el-radio-button :value="30">近30天</el-radio-button>
-              </el-radio-group>
-            </div>
-          </template>
-          <ECharts :options="visitTrendChartOptions" height="400px" />
-        </el-card>
-      </el-col>
-      <!-- 最新动态 -->
-      <el-col :xs="24" :span="8">
-        <el-card>
-          <template #header>
-            <div class="flex-x-between">
-              <span class="header-title">最新动态</span>
-              <el-link
-                type="primary"
-                underline="never"
-                href="https://gitee.com/fastapiadmin/FastapiAdmin/releases"
-                target="_blank"
-              >
-                完整记录
-                <el-icon class="link-icon">
-                  <TopRight />
-                </el-icon>
-              </el-link>
-            </div>
-          </template>
-
-          <el-scrollbar height="400px">
-            <el-timeline class="p-3">
-              <el-timeline-item
-                v-for="(item, index) in vesionList"
-                :key="index"
-                :timestamp="item.date"
-                placement="top"
-                :color="index === 0 ? '#67C23A' : '#909399'"
-                :hollow="index !== 0"
-                size="large"
-              >
-                <div class="version-item" :class="{ 'latest-item': index === 0 }">
-                  <div>
-                    <el-text tag="strong">{{ item.title }}</el-text>
-                    <el-tag v-if="item.tag" :type="index === 0 ? 'success' : 'info'" size="small">
-                      {{ item.tag }}
-                    </el-tag>
-                  </div>
-
-                  <el-text class="version-content">{{ item.content }}</el-text>
-
-                  <div v-if="item.link">
-                    <el-link
-                      :type="index === 0 ? 'primary' : 'info'"
-                      :href="item.link"
-                      target="_blank"
-                      underline="never"
-                    >
-                      详情
-                      <el-icon class="link-icon">
-                        <TopRight />
-                      </el-icon>
-                    </el-link>
-                  </div>
-                </div>
-              </el-timeline-item>
-            </el-timeline>
-          </el-scrollbar>
-        </el-card>
-      </el-col>
-    </el-row>
   </div>
 </template>
 

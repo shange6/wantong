@@ -9,6 +9,83 @@ from datetime import datetime
 
 class OrdersService:
     @classmethod
+    async def get_unorders_list_service(cls, page_no: int, page_size: int, search: any):
+        """
+        获取所有在组件表中存在，但尚未在订单表中创建记录的组件
+        :param page_no: 页码
+        :param page_size: 每页条数（0则返回全部）
+        :param search: 过滤条件（需包含 project_code 等）
+        :return: 分页结果
+        """
+        async with async_db_session() as session:
+            # 1. 构建左连接查询：ComponentsModel为主，关联 OrdersModel
+            # 逻辑：找出那些在 OrdersModel 中没有对应记录的组件
+            stmt = (
+                select(ComponentsModel)
+                .outerjoin(OrdersModel, ComponentsModel.wtcode == OrdersModel.wtcode)
+                .where(OrdersModel.wtcode.is_(None))
+            )
+
+            # 2. 过滤条件扩展
+            if hasattr(search, 'project_code') and search.project_code:
+                stmt = stmt.where(ComponentsModel.project_code == search.project_code)
+            if hasattr(search, 'wtcode') and search.wtcode:
+                stmt = stmt.where(ComponentsModel.wtcode.ilike(f"%{search.wtcode}%"))
+
+            # 3. 计算总条数
+            count_stmt = select(func.count()).select_from(stmt.subquery())
+            total = (await session.execute(count_stmt)).scalar() or 0
+
+            # 4. 排序（按万通码排序，保证树形结构的逻辑性）
+            stmt = stmt.order_by(ComponentsModel.wtcode.asc())
+
+            # 5. 分页处理
+            if page_size > 0:
+                stmt = stmt.offset((page_no - 1) * page_size).limit(page_size)
+
+            # 6. 执行查询
+            result = await session.execute(stmt)
+            items = result.scalars().all()
+
+            # 7. 格式化数据（对齐你代码中的数据结构）
+            data_list = []
+            for comp in items:
+                # 将组件模型转换为字典
+                # 备注：假设你有对应的 Schema 叫 ComponentsOut，如果没有，可手动转为 dict
+                comp_dict = {
+                    "id": comp.id,
+                    "project_code": comp.project_code,
+                    "wtcode": comp.wtcode,
+                    "code": comp.code,
+                    "spec": comp.spec,
+                    "count": comp.count,
+                    "material": comp.material,
+                    "unit_mass": comp.unit_mass,
+                    "total_mass": comp.total_mass,
+                    "remark": comp.remark,
+                    "created_time": comp.created_time,
+                }
+
+                # 时间字段格式化
+                def format_datetime(dt: datetime | None) -> str:
+                    return dt.strftime("%Y-%m-%d %H:%M:%S") if dt else ""
+
+                if comp_dict.get("created_time"):
+                    comp_dict["created_time"] = format_datetime(comp_dict["created_time"])
+                
+                # 添加标记位（可选），前端可以根据此字段区分这是“待排产”组件
+                comp_dict["is_ordered"] = False
+                
+                data_list.append(comp_dict)
+
+            return {
+                "items": data_list,
+                "total": total,
+                "page_no": page_no,
+                "page_size": page_size
+            }   
+
+    @classmethod
     async def get_orders_list_service(cls, page_no: int, page_size: int, search: OrdersFilter):
         """
         分页查询订单列表（关联组件表）

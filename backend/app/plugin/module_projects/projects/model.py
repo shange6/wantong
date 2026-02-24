@@ -18,8 +18,4 @@ class ProjectsModel(ModelMixin, UserMixin):
     no: Mapped[str] = mapped_column(String(64), unique=True, index=True, comment="合同号")
     
     # 关联组件
-    components: Mapped[List["ComponentsModel"]] = relationship(
-        "ComponentsModel",
-        back_populates="projects", 
-        cascade="all, delete-orphan"
-    )
+    components: Mapped[List["ComponentsModel"]] = relationship("ComponentsModel", back_populates="project", cascade="all, delete-orphan")

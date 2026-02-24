@@ -2,7 +2,7 @@
   <div class="logo">
     <transition enter-active-class="animate__animated animate__fadeInLeft">
       <router-link :key="+collapse" class="wh-full flex-center" to="/">
-        <img :src="configStore.configData.sys_web_logo.config_value" class="w50px h50px" />
+        <img :src="configStore.configData.sys_web_logo.config_value" class="w50px h25px" />
         <span v-if="!collapse" class="title">
           {{ configStore.configData.sys_web_title.config_value }}
         </span>
@@ -31,10 +31,10 @@ defineProps({
 
   .title {
     max-width: 100px;
-    margin-left: 10px;
+    margin-left: 5px;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: bold;
     color: $sidebar-logo-text-color;
     white-space: nowrap;

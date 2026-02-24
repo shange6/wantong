@@ -171,10 +171,10 @@ async def register_user_controller(
     返回:
     - JSONResponse: 注册用户JSON响应
     """
-    auth = AuthSchema(db=db)
-    user_register_result = await UserService.register_user_service(data=data, auth=auth)
-    log.info(f"{data.username} 注册用户成功: {user_register_result}")
-    return SuccessResponse(data=user_register_result, msg="注册用户成功")
+    # auth = AuthSchema(db=db)
+    # user_register_result = await UserService.register_user_service(data=data, auth=auth)
+    # log.info(f"{data.username} 注册用户成功: {user_register_result}")
+    # return SuccessResponse(data=user_register_result, msg="注册用户成功")
 
 
 @UserRouter.post(

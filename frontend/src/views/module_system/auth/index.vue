@@ -21,27 +21,16 @@
           <span class="auth-feature__dot" />
           Enterprise Ready
         </div>
-        <h1 class="auth-feature__title">企业级管理系统</h1>
-        <p class="auth-feature__subtitle">
-          提供安全、高效、可扩展的管理解决方案，助力企业数字化转型与业务增长。
-        </p>
+        <h1 class="auth-feature__title">万通管理系统</h1>
+        <!-- <p class="auth-feature__subtitle">
+          助力企业数字化转型与业务增长
+        </p> -->
         <ul class="auth-feature__highlights">
           <li>
             <span>✓</span>
-            统一身份认证与权限管理
+            企业数字化转型与业务增长数字平台
           </li>
-          <li>
-            <span>✓</span>
-            支持定时任务与任务调度
-          </li>
-          <li>
-            <span>✓</span>
-            数据安全与操作审计
-          </li>
-          <li>
-            <span>✓</span>
-            灵活扩展与高可用架构
-          </li>
+          
         </ul>
       </section>
 
@@ -152,10 +141,9 @@ let notificationInstance: ReturnType<typeof ElNotification> | null = null;
 
 const showVoteNotification = () => {
   notificationInstance = ElNotification({
-    title: "⭐ FastapiAdmin 完全开源 · 期待您的 Star 支持 🙏",
-    message: `项目持续迭代中，若对您有所帮助，欢迎点亮 Star 支持！
-    <br/><a href="https://github.com/fastapiadmin/FastapiAdmin" target="_blank" style="color: var(--el-color-primary); text-decoration: none; font-weight: 500;">Github仓库 →</a>
-    <br/><a href="https://gitee.com/fastapiadmin/FastapiAdmin" target="_blank" style="color: var(--el-color-warning); text-decoration: none; font-weight: 500;">Gitee仓库 →</a>`,
+    title: "⭐ 欢迎使用万通管理系统 🙏",
+    message: `已经完成项目管理、生产管理两大模块
+    正在紧张开发中...    敬请期待`,
     type: "success",
     position: "bottom-left",
     duration: 0,
@@ -252,11 +240,11 @@ onBeforeUnmount(() => {
 
 .auth-view__wrapper {
   display: grid;
-  flex: 1;
+  // flex: 1;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: clamp(1.5rem, 3vw, 3rem);
-  align-items: stretch;
-  padding: clamp(1.5rem, 2vw, 2.5rem);
+  // gap: clamp(1.5rem, 3vw, 3rem);
+  // align-items: stretch;
+  // padding: clamp(0rem, 2vw, 2.5rem);
 }
 
 .auth-feature {

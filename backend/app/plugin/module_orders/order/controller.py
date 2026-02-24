@@ -8,7 +8,20 @@ from app.core.router_class import OperationLogRoute
 from app.api.v1.module_system.auth.schema import AuthSchema
 from app.core.dependencies import AuthPermission
 
-OrdersRouter = APIRouter(route_class=OperationLogRoute, prefix="/orders", tags=["工单管理"])
+OrdersRouter = APIRouter(route_class=OperationLogRoute, prefix="/order", tags=["工单管理"])
+
+@OrdersRouter.get("/unorderlist", summary="获取代办工单列表")
+async def get_unorders_list(
+    page: Annotated[PaginationQueryParam, Depends()],
+    search: Annotated[OrdersFilter, Depends()],
+    auth: Annotated[AuthSchema, Depends(AuthPermission(["module_projects:orders:query"]))]
+):
+    data = await OrdersService.get_unorders_list_service(
+        page_no=page.page_no,
+        page_size=page.page_size,
+        search=search
+    )
+    return SuccessResponse(data=data)
 
 @OrdersRouter.get("/list", summary="获取工单列表")
 async def get_orders_list(
