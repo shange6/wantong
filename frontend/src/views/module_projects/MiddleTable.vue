@@ -11,7 +11,7 @@
 
       <template #pagination-area>
         <el-pagination
-          v-if="fullData.length > 0 && !$attrs['row-key']"
+          v-if="fullData.length > 0 && !($attrs['row-key'] || $attrs['rowKey'])"
           :current-page="currentPage"
           :page-size="pageSize"
           :total="fullData.length"
@@ -75,7 +75,7 @@ const displayData = computed(() => {
   // 或者自行实现“树形分页”算法。
 
   // 检查是否传入了 row-key（作为树形数据的特征之一）
-  if (attrs["row-key"]) {
+  if (attrs["row-key"] || attrs["rowKey"]) {
     return data; // 如果是树形表，直接返回全量数据，交给 el-table 自身处理（或者不分页）
   }
 

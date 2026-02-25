@@ -3,17 +3,17 @@
     <MiddleTable
       v-bind="$attrs"
       :data="displayData"
-      :current-page="currentPage"
-      :page-size="pageSize"
-      @update:current-page="handlePageUpdate"
-      @update:page-size="handleSizeUpdate"
+      :current-page="pagination.currentPage"
+      :page-size="pagination.pageSize"
+      @update:current-page="(val) => (pagination.currentPage = val)"
+      @update:page-size="(val) => (pagination.pageSize = val)"
     >
       <template #append-columns="{ formatWtCode }">
         <el-table-column type="selection" fixed min-width="20" align="center" />
         <el-table-column label="万通码" prop="wtcode" min-width="100" show-overflow-tooltip>
-          <template #default="{ row }">
+          <!-- <template #default="{ row }">
             <span class="wtcode-text">{{ formatWtCode(row.wtcode) }}</span>
-          </template>
+          </template> -->
         </el-table-column>
         <el-table-column label="代号" prop="code" min-width="110" show-overflow-tooltip />
         <el-table-column label="名称" prop="spec" min-width="100" show-overflow-tooltip />
@@ -35,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, reactive, computed, onMounted } from "vue";
 import MiddleTable from "./MiddleTable.vue";
 import ComponentsAPI, {
   type ComponentsData,
@@ -50,25 +50,26 @@ defineOptions({
 interface Props {
   data?: ComponentsData[];
   queryParams?: ComponentsQuery;
-  currentPage?: number;
-  pageSize?: number;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   queryParams: () => ({}),
-  currentPage: 1,
-  pageSize: 10,
 });
 
 const emit = defineEmits<{
-  (e: "update:currentPage", val: number): void;
-  (e: "update:pageSize", val: number): void;
   (e: "load-data", data: ComponentsData[]): void;
 }>();
 
 // --- 状态管理 ---
 const loading = ref<boolean>(false);
 const internalData = ref<ComponentsData[]>([]); // 内部存储数组
+
+// 内部管理分页状态
+const pagination = reactive({
+  currentPage: 1,
+  pageSize: 10,
+});
+
 const displayData = computed<ComponentsData[]>(() => {
   // 优先使用父组件传递的数据（支持空数组，用于显示搜索无结果）
   // 仅当 props.data 为 undefined 时，才使用内部数据
@@ -85,7 +86,12 @@ const displayData = computed<ComponentsData[]>(() => {
 const handleQuery = async (params?: ComponentsQuery) => {
   loading.value = true;
   try {
-    const res = await ComponentsAPI.getList(params || {});
+    const query = {
+      ...params,
+      page_no: 1, // 全量获取时，页码固定为 1
+      page_size: 0, // 传 0 触发后端返回全量数据
+    };
+    const res = await ComponentsAPI.getList(query);
     internalData.value =
       res.data?.data?.items || (Array.isArray(res.data.data) ? res.data.data : []) || [];
     emit("load-data", internalData.value);
@@ -97,9 +103,12 @@ const handleQuery = async (params?: ComponentsQuery) => {
   }
 };
 
-// 事件转发逻辑
-const handlePageUpdate = (val: number) => emit("update:currentPage", val);
-const handleSizeUpdate = (val: number) => emit("update:pageSize", val);
+onMounted(() => {
+  // 只有当没有传入外部数据时，才主动触发内部查询
+  if (props.data === undefined) {
+    handleQuery(props.queryParams);
+  }
+});
 
 // 暴露刷新方法给父组件
 defineExpose({

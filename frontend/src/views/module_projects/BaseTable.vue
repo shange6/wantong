@@ -16,6 +16,8 @@
 </template>
 
 <script setup lang="ts">
+import { computed, useAttrs } from "vue";
+
 defineOptions({
   name: "BaseTable",
   inheritAttrs: false, // 禁止属性自动挂载到根 div 上

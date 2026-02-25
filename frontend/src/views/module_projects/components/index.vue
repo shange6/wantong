@@ -22,10 +22,10 @@
       ref="componentsTableRef"
       :data="displayData"
       :current-page="pagination.currentPage"
-      :page-size="pagination.pageSize"
+      :page-size="pageSize"
       @load-data="handleTableLoad"
-      @update:current-page="(val) => (pagination.currentPage = val)"
-      @update:page-size="(val) => (pagination.pageSize = val)"
+      @update:current-page="(val: number) => (pagination.currentPage = val)"
+      @update:page-size="(val: number) => (pageSize = val)"
     />
 
     <ProjectsDrawerTable
@@ -58,8 +58,9 @@ const filteredData = ref<any[] | null>(null);
 // 分页状态（必须在父组件管理，否则分页点击无效）
 const pagination = reactive({
   currentPage: 1,
-  pageSize: 10,
 });
+
+const pageSize = ref(10);
 
 // 查询参数
 const queryFormData = ref({

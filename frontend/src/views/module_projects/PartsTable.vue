@@ -5,10 +5,10 @@
       :data="displayData"
       row-key="wtcode"
       :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
-      :current-page="currentPage"
-      :page-size="pageSize"
-      @update:current-page="handlePageUpdate"
-      @update:page-size="handleSizeUpdate"
+      :current-page="pagination.currentPage"
+      :page-size="pagination.pageSize"
+      @update:current-page="(val) => (pagination.currentPage = val)"
+      @update:page-size="(val) => (pagination.pageSize = val)"
     >
       <template #append-columns="{ formatWtCode }">
         <el-table-column type="selection" fixed min-width="20" align="center" />
@@ -37,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from "vue";
+import { ref, reactive, computed, watch, onMounted } from "vue";
 import MiddleTable from "./MiddleTable.vue";
 import PartsAPI, { type PartsData, type PartsQuery } from "@/api/module_projects/parts";
 
@@ -49,38 +49,44 @@ defineOptions({
 interface Props {
   data?: PartsData[];
   queryParams?: PartsQuery;
-  currentPage?: number;
-  pageSize?: number;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   queryParams: () => ({}),
-  currentPage: 1,
-  pageSize: 10,
 });
 
 const emit = defineEmits<{
-  (e: "update:currentPage", val: number): void;
-  (e: "update:pageSize", val: number): void;
   (e: "load-data", val: any[]): void;
 }>();
 
 // --- 4. 内部状态管理 ---
 const loading = ref(false);
 const internalData = ref<PartsData[]>([]); // 内部存储数组
+
+// 内部管理分页状态
+const pagination = reactive({
+  currentPage: 1,
+  pageSize: 10,
+});
+
 const displayData = computed<PartsData[]>(() => {
-  // 优先使用父组件传递的数据（支持空数组，用于显示搜索无结果）
-  // 仅当 props.data 为 undefined 时，才使用内部数据
+  // 1. 获取基础数据
+  let rawData: PartsData[] = [];
   if (props.data !== undefined) {
-    if (!Array.isArray(props.data)) {
-      return [];
-    }
-    return listToTree([...props.data]);
+    rawData = Array.isArray(props.data) ? [...props.data] : [];
+  } else {
+    rawData = Array.isArray(internalData.value) ? [...internalData.value] : [];
   }
-  if (!Array.isArray(internalData.value)) {
-    return [];
+
+  // 2. 检查数据是否已经是树形结构（如果包含 children 且有值，说明已经被处理过）
+  const isAlreadyTree = rawData.some((item) => Array.isArray(item.children) && item.children.length > 0);
+
+  if (isAlreadyTree) {
+    return rawData;
   }
-  return listToTree([...internalData.value]);
+
+  // 3. 转换为树形结构
+  return listToTree(rawData);
 });
 
 /**
@@ -90,50 +96,61 @@ const displayData = computed<PartsData[]>(() => {
 const handleQuery = async (params?: PartsQuery) => {
   loading.value = true;
   try {
-    const res = await PartsAPI.getList(params || {});
+    const query = {
+      ...params,
+      page_no: 1, // 全量获取时，页码固定为 1
+      page_size: 0, // 传 0 触发后端返回全量数据
+    };
+    const res = await PartsAPI.getList(query);
     internalData.value =
       res.data?.data?.items || (Array.isArray(res.data.data) ? res.data.data : []) || [];
-    emit("load-data", internalData.value); // 加载成功后向外抛出事件
+    emit("load-data", internalData.value);
   } catch (error) {
-    console.error("获取零件数据失败:", error);
+    console.error("获取部件数据失败:", error);
     internalData.value = [];
   } finally {
     loading.value = false;
   }
 };
 
-// 转换数组格式符合折叠标准
-const listToTree = (data: any[]) => {
-  const map: Record<string, any> = {};
-  const roots: any[] = [];
-  data.sort((a, b) => a.wtcode.length - b.wtcode.length || a.wtcode.localeCompare(b.wtcode));
+// --- 5. 辅助方法：列表转树形结构 ---
+function listToTree(data: PartsData[]): PartsData[] {
+  const map: Record<string, PartsData> = {};
+  const tree: PartsData[] = [];
+
+  data.sort((a, b) => a.wtcode.length - b.wtcode.length);
+
   data.forEach((item) => {
     map[item.wtcode] = { ...item, children: [] };
   });
+
   data.forEach((item) => {
-    const node = map[item.wtcode];
     const lastDotIndex = item.wtcode.lastIndexOf(".");
     if (lastDotIndex > -1) {
-      const parentWtcode = item.wtcode.substring(0, lastDotIndex);
-      if (map[parentWtcode]) {
-        map[parentWtcode].children.push(node);
+      const parentCode = item.wtcode.substring(0, lastDotIndex);
+      if (map[parentCode]) {
+        map[parentCode].children?.push(map[item.wtcode]);
       } else {
-        roots.push(node);
+        tree.push(map[item.wtcode]);
       }
     } else {
-      roots.push(node);
+      tree.push(map[item.wtcode]);
     }
   });
-  return roots;
-};
 
-const handlePageUpdate = (val: number) => emit("update:currentPage", val);
-const handleSizeUpdate = (val: number) => emit("update:pageSize", val);
+  return tree;
+}
+
+onMounted(() => {
+  // 只有当没有传入外部数据时，才主动触发内部查询
+  if (props.data === undefined) {
+    handleQuery(props.queryParams);
+  }
+});
 
 // 暴露刷新方法给父组件
 defineExpose({
   handleQuery,
-  listToTree,
 });
 </script>
 

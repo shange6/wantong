@@ -28,8 +28,8 @@
       :current-page="paginationParts.currentPage"
       :page-size="paginationParts.pageSize"
       @load-data="handlePartsLoad"
-      @update:current-page="(val) => (paginationParts.currentPage = val)"
-      @update:page-size="(val) => (paginationParts.pageSize = val)"
+      @update:current-page="(val: number) => (paginationParts.currentPage = val)"
+      @update:page-size="(val: number) => (paginationParts.pageSize = val)"
     />
 
     <ComponentsTable
@@ -40,8 +40,8 @@
       :page-size="paginationComponents.pageSize"
       @row-click="handleComponentRowClick"
       @load-data="handleComponentsLoad"
-      @update:current-page="(val) => (paginationComponents.currentPage = val)"
-      @update:page-size="(val) => (paginationComponents.pageSize = val)"
+      @update:current-page="(val: number) => (paginationComponents.currentPage = val)"
+      @update:page-size="(val: number) => (paginationComponents.pageSize = val)"
     />
 
     <ProjectsDrawerTable
@@ -124,8 +124,8 @@ function handleComponentRowClick(row: any) {
 }
 
 function handleProjectRowClick(row: any) {
-  queryFormData.value.project_code = undefined;
-  queryFormData.value.code = row.code;
+  // queryFormData.value.project_code = undefined;
+  // queryFormData.value.code = row.code; // 这里的 row.code 是项目的代号，不应该赋值给搜索框的代号
   componentsTableRef.value?.handleQuery?.({ code: row.code });
 }
 

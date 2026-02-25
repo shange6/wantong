@@ -3,11 +3,11 @@
     <MiddleTable
       v-bind="$attrs"
       :data="displayData"
-      :current-page="currentPage"
-      :page-size="pageSize"
+      :current-page="pagination.currentPage"
+      :page-size="pagination.pageSize"
       @row-click="handleRowClick"
-      @update:current-page="handlePageUpdate"
-      @update:page-size="handleSizeUpdate"
+      @update:current-page="(val) => (pagination.currentPage = val)"
+      @update:page-size="(val) => (pagination.pageSize = val)"
     >
       <template #append-columns="{ formatWtCode }">
         <el-table-column type="selection" fixed width="40" align="center" />
@@ -33,24 +33,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
+import { ref, reactive, onMounted, computed } from "vue";
 import MiddleTable from "./MiddleTable.vue";
 import ProjectsAPI, { type ProjectsData, type ProjectsQuery } from "@/api/module_projects/projects";
 
 interface Props {
   data?: ProjectsData[]; // 使用 API 定义的项目数据类型
-  currentPage?: number;
-  pageSize?: number;
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  currentPage: 1,
-  pageSize: 10,
-});
+const props = defineProps<Props>();
 
 const emit = defineEmits<{
-  (e: "update:currentPage", val: number): void;
-  (e: "update:pageSize", val: number): void;
   (e: "row-click", row: ProjectsData): void;
   (e: "load-data", data: ProjectsData[]): void;
 }>();
@@ -63,6 +56,12 @@ defineOptions({
 // --- 状态管理 ---
 const loading = ref<boolean>(false);
 const internalData = ref<ProjectsData[]>([]); // 内部存储数组
+
+// 内部管理分页状态
+const pagination = reactive({
+  currentPage: 1,
+  pageSize: 10,
+});
 
 const displayData = computed<ProjectsData[]>(() => {
   // 优先使用父组件传递的数据（支持空数组，用于显示搜索无结果）
@@ -80,7 +79,12 @@ const displayData = computed<ProjectsData[]>(() => {
 const handleQuery = async (params?: ProjectsQuery) => {
   loading.value = true;
   try {
-    const res = await ProjectsAPI.getList(params || {});
+    const query = {
+      ...params,
+      page_no: 1, // 全量获取时，页码固定为 1
+      page_size: 0, // 传 0 触发后端返回全量数据
+    };
+    const res = await ProjectsAPI.getList(query);
 
     // 兼容后端返回结构 { data: { items: [], total: 0 } }
     const rawData =
@@ -95,19 +99,21 @@ const handleQuery = async (params?: ProjectsQuery) => {
   }
 };
 
+const handleRowClick = (row: ProjectsData) => {
+  // emit("row-click", row);
+};
+
+onMounted(() => {
+  // 只有当没有传入外部数据时，才主动触发内部查询
+  // if (props.data === undefined) {
+    handleQuery();
+  // }
+});
+
 // 暴露刷新方法给父组件
 defineExpose({
   handleQuery,
 });
-
-onMounted(() => {
-  handleQuery();
-});
-
-// 事件转发逻辑
-const handlePageUpdate = (val: number) => emit("update:currentPage", val);
-const handleSizeUpdate = (val: number) => emit("update:pageSize", val);
-const handleRowClick = (row: ProjectsData) => emit("row-click", row);
 </script>
 
 <style scoped>

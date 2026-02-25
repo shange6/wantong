@@ -16,8 +16,8 @@
       :page-size="pagination.pageSize"
       @row-click="handleProjectRowClick"
       @load-data="handleTableLoad"
-      @update:current-page="(val) => (pagination.currentPage = val)"
-      @update:page-size="(val) => (pagination.pageSize = val)"
+      @update:current-page="(val: number) => (pagination.currentPage = val)"
+      @update:page-size="(val: number) => (pagination.pageSize = val)"
     />
   </div>
 </template>
