@@ -11,6 +11,14 @@ const RoleAPI = {
     });
   },
 
+  listRoleUsers(params: { role_id?: number; role_name?: string }) {
+    return request<ApiResponse<Array<{ id: number; name: string }>>>({
+      url: `${API_PATH}/users`,
+      method: "get",
+      params,
+    });
+  },
+
   detailRole(query: number) {
     return request<ApiResponse<RoleTable>>({
       url: `${API_PATH}/detail/${query}`,

@@ -124,9 +124,9 @@ function handleComponentRowClick(row: any) {
 }
 
 function handleProjectRowClick(row: any) {
-  queryFormData.value.project_code = row.code;
-  componentsTableRef.value?.handleQuery?.();
-  partsTableVisible.value = false;
+  queryFormData.value.project_code = undefined;
+  queryFormData.value.code = row.code;
+  componentsTableRef.value?.handleQuery?.({ code: row.code });
 }
 
 const handleFilterReset = () => {

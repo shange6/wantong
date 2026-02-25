@@ -1,6 +1,5 @@
 <template>
   <div class="dashboard-container">
-
     <!-- 数据统计 -->
     <el-row :gutter="10" class="mt-4">
       <!-- 在线用户数量 -->
@@ -159,7 +158,6 @@
         </el-skeleton>
       </el-col>
     </el-row>
-
   </div>
 </template>
 

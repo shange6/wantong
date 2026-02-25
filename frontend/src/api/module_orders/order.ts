@@ -18,11 +18,11 @@ export interface OrdersData {
   components_unit_mass: string;
   components_totle_mass: string;
   components_remark: string;
-  blanking?: Date;
-  rivetweld?: Date;
-  machine?: Date;
-  fitting?: Date;
-  painting?: Date;
+  blanking_time?: Date;
+  rivetweld_time?: Date;
+  machine_time?: Date;
+  fitting_time?: Date;
+  painting_time?: Date;
   created_time: Date;
   updated_time: Date;
   [key: string]: any;

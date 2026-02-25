@@ -30,7 +30,6 @@
             <span>✓</span>
             企业数字化转型与业务增长数字平台
           </li>
-          
         </ul>
       </section>
 
@@ -392,8 +391,8 @@ onBeforeUnmount(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 52px;
-  height: 52px;
+  width: 70px;
+  height: 70px;
   background: radial-gradient(circle at 30% 20%, #ffffff, #e6efff);
   border-radius: 18px;
   box-shadow:
@@ -410,8 +409,8 @@ onBeforeUnmount(() => {
 
 .auth-panel__logo {
   flex-shrink: 0;
-  width: 52px;
-  height: 52px;
+  width: 65px;
+  height: 65px;
 }
 
 .auth-panel__meta {

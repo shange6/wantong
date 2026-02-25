@@ -23,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from "vue";
+import { ref, reactive, computed } from "vue";
 
 import SearchForm from "../SearchForm.vue";
 import ProjectsTable from "../ProjectsTable.vue";

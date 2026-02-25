@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Depends, Path
+from fastapi import APIRouter, Body, Depends, Path, Query
 from fastapi.responses import JSONResponse, StreamingResponse
 
 from app.api.v1.module_system.auth.schema import AuthSchema
@@ -60,6 +60,24 @@ async def get_obj_list_controller(
     )
     log.info("查询角色成功")
     return SuccessResponse(data=result_dict, msg="查询角色成功")
+
+
+@RoleRouter.get(
+    "/users",
+    summary="查询角色下用户",
+    description="查询角色下用户",
+)
+async def get_role_users_controller(
+    auth: Annotated[AuthSchema, Depends(AuthPermission(["module_system:role:query"]))],
+    role_id: Annotated[int | None, Query(description="角色ID")] = None,
+    role_name: Annotated[str | None, Query(description="角色名称")] = None,
+) -> JSONResponse:
+    data = await RoleService.get_role_users_service(
+        auth=auth,
+        role_id=role_id,
+        role_name=role_name,
+    )
+    return SuccessResponse(data=data, msg="查询角色下用户成功")
 
 
 @RoleRouter.get(

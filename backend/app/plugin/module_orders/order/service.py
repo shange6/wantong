@@ -141,7 +141,7 @@ class OrdersService:
                 def format_datetime(dt: datetime | None) -> str:
                     return dt.strftime("%Y-%m-%d %H:%M:%S") if dt else ""
                 
-                time_fields = ["blanking", "rivetweld", "machine", "fitting", "painting", "created_time"]
+                time_fields = ["blanking_time", "rivetweld_time", "machine_time", "fitting_time", "painting_time", "created_time"]
                 for field in time_fields:
                     if order_dict.get(field):
                         order_dict[field] = format_datetime(order_dict[field])

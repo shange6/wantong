@@ -19,7 +19,7 @@
     </SearchForm>
 
     <ComponentsTable
-      ref="projectTableRef"
+      ref="componentsTableRef"
       :data="displayData"
       :current-page="pagination.currentPage"
       :page-size="pagination.pageSize"
@@ -37,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from "vue";
+import { ref, reactive, computed } from "vue";
 import SearchForm from "../SearchForm.vue";
 import ComponentsTable from "../ComponentsTable.vue";
 import ProjectsDrawerTable from "../ProjectsDrawerTable.vue";
@@ -47,7 +47,7 @@ defineOptions({
 });
 
 // --- 状态管理 ---
-const projectTableRef = ref(); // 修正：与模板中的 ref 一致
+const componentsTableRef = ref(); // 修正：与模板中的 ref 一致
 const projectDrawerVisible = ref(false);
 
 // 原始数据底稿（供 SearchForm 过滤用）
@@ -105,9 +105,9 @@ function handleFilterReset() {
  * 项目行点击
  */
 function handleProjectRowClick(row: any) {
-  queryFormData.value.project_code = row.code;
-  // 如果需要点击后重新请求后端：
-  projectTableRef.value?.handleQuery?.();
+  queryFormData.value.project_code = undefined;
+  queryFormData.value.code = row.code;
+  componentsTableRef.value?.handleQuery?.({ code: row.code });
 }
 
 const handleOpenProjectDrawer = () => {

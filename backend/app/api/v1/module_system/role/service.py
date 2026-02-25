@@ -55,6 +55,24 @@ class RoleService:
         return [RoleOutSchema.model_validate(role).model_dump() for role in role_list]
 
     @classmethod
+    async def get_role_users_service(
+        cls,
+        auth: AuthSchema,
+        role_id: int | None = None,
+        role_name: str | None = None,
+    ) -> list[dict]:
+        if not role_id and not role_name:
+            raise CustomException(msg="缺少角色标识")
+        if role_id:
+            role = await RoleCRUD(auth).get_by_id_crud(id=role_id, preload=["users"])
+        else:
+            role = await RoleCRUD(auth).get(name=role_name, preload=["users"])
+        if not role:
+            return []
+        users = role.users or []
+        return [{"id": user.id, "name": user.name} for user in users]
+
+    @classmethod
     async def create_role_service(cls, auth: AuthSchema, data: RoleCreateSchema) -> dict:
         """
         创建角色
