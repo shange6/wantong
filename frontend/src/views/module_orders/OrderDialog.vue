@@ -312,8 +312,13 @@ watch(
   (val) => {
     visible.value = val;
     if (val && props.data) {
-      formData.value = { ...initialFormData, wtcode: props.data.wtcode };
-      dialogTitle.value = props.title || "创建工单";
+      // 合并初始数据、万通码以及可能存在的旧工单数据
+      formData.value = { 
+        ...initialFormData, 
+        wtcode: props.data.wtcode,
+        ...props.data 
+      };
+      dialogTitle.value = props.title || (props.data.id ? "编辑工单" : "创建工单");
       loadRoleUsers();
     }
   }

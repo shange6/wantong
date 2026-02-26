@@ -3,6 +3,7 @@ from sqlalchemy.orm import selectinload  # 已补充导入
 from .model import OrdersModel
 from app.plugin.module_projects.components.model import ComponentsModel
 from .schema import OrdersFilter, OrdersCreate, OrdersUpdate, OrdersOut
+from app.plugin.module_projects.components.schema import ComponentsOut
 from app.core.database import async_db_session
 from app.core.exceptions import CustomException
 from datetime import datetime
@@ -50,28 +51,8 @@ class OrdersService:
             # 7. 格式化数据（对齐你代码中的数据结构）
             data_list = []
             for comp in items:
-                # 将组件模型转换为字典
-                # 备注：假设你有对应的 Schema 叫 ComponentsOut，如果没有，可手动转为 dict
-                comp_dict = {
-                    "id": comp.id,
-                    "project_code": comp.project_code,
-                    "wtcode": comp.wtcode,
-                    "code": comp.code,
-                    "spec": comp.spec,
-                    "count": comp.count,
-                    "material": comp.material,
-                    "unit_mass": comp.unit_mass,
-                    "total_mass": comp.total_mass,
-                    "remark": comp.remark,
-                    "created_time": comp.created_time,
-                }
-
-                # 时间字段格式化
-                def format_datetime(dt: datetime | None) -> str:
-                    return dt.strftime("%Y-%m-%d %H:%M:%S") if dt else ""
-
-                if comp_dict.get("created_time"):
-                    comp_dict["created_time"] = format_datetime(comp_dict["created_time"])
+                # 使用 ComponentsOut 进行序列化，自动处理时间格式
+                comp_dict = ComponentsOut.model_validate(comp).model_dump(mode='json')
                 
                 # 添加标记位（可选），前端可以根据此字段区分这是“待排产”组件
                 comp_dict["is_ordered"] = False
@@ -119,11 +100,12 @@ class OrdersService:
             result = await session.execute(stmt)
             items = result.scalars().all()
             
-            # 格式化数据：关联组件字段 + 时间格式化
+            # 格式化数据：关联组件字段
             data_list = []
             for order in items:
-                # 基础订单数据（通过Pydantic序列化）
-                order_dict = OrdersOut.model_validate(order).model_dump()
+                # 使用 Pydantic 的 model_dump(mode='json') 自动调用 DateTimeStr 的 PlainSerializer
+                # 这将处理时间字段的格式化（转为YYYY-MM-DD HH:mm:ss）
+                order_dict = OrdersOut.model_validate(order).model_dump(mode='json')
                 
                 # 关联组件数据（兼容组件为空的情况）
                 component_data = order.component or ComponentsModel()
@@ -136,15 +118,6 @@ class OrdersService:
                     "components_totle_mass": component_data.total_mass or 0.0,
                     "components_remark": component_data.remark or "",
                 }
-                
-                # 时间字段格式化（转为YYYY-MM-DD HH:mm:ss）
-                def format_datetime(dt: datetime | None) -> str:
-                    return dt.strftime("%Y-%m-%d %H:%M:%S") if dt else ""
-                
-                time_fields = ["blanking_time", "rivetweld_time", "machine_time", "fitting_time", "painting_time", "created_time"]
-                for field in time_fields:
-                    if order_dict.get(field):
-                        order_dict[field] = format_datetime(order_dict[field])
                 
                 # 合并订单+组件数据
                 order_dict.update(component_dict)

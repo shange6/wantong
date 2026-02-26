@@ -50,11 +50,13 @@ class ComponentsFilter(BaseModel):
 
     model_config = ConfigDict(extra="ignore")
 
+from app.core.validator import DateTimeStr
+
 class ComponentsOut(ComponentsBase):
     """
     部件输出模型
     """
-    # id: int
-    # created_time: datetime
-    # updated_time: datetime    
+    id: int
+    created_time: Optional[DateTimeStr] = None
+    updated_time: Optional[DateTimeStr] = None
     model_config = ConfigDict(from_attributes=True)

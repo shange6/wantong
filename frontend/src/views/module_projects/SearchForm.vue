@@ -127,10 +127,10 @@ const filterData = (nodes: TreeNode[], query: QueryModel): TreeNode[] => {
     const filteredChildren = hasChildren ? filterData(node.children!, query) : [];
 
     // 属性安全提取
-    const nCode = String(node.code ?? "").toLowerCase();
-    const nSpec = String(node.spec ?? node.name ?? "").toLowerCase(); // spec和name有一个字段即可
-    const nMat = String(node.material ?? "").toLowerCase();
-    const nRem = String(node.remark ?? "").toLowerCase();
+    const nCode = String(node.code ?? node.components_code ?? "").toLowerCase();
+    const nSpec = String(node.spec ?? node.name ?? node.components_spec ?? "").toLowerCase(); // spec和name有一个字段即可
+    const nMat = String(node.material ?? node.components_material ?? "").toLowerCase();
+    const nRem = String(node.remark ?? node.components_remark ?? "").toLowerCase();
     const nNo = String(node.no ?? "").toLowerCase();
 
     // 匹配逻辑

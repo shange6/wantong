@@ -2,7 +2,7 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import Optional, List
-from app.core.validator import DateTimeStr
+from app.core.validator import DateTimeStr, DateStr
 
 class OrdersFilter(BaseModel):
     """订单查询过滤条件"""
@@ -11,19 +11,19 @@ class OrdersFilter(BaseModel):
 class OrderBaseModel(BaseModel):
     """订单工序基础模型"""
     is_blanking: bool = Field(False, description="是否下料")
-    blanking_time: Optional[DateTimeStr] = Field(None, description="下料时间")
+    blanking_time: Optional[DateStr] = Field(None, description="下料时间")
     blanking_user: Optional[str] = Field(None, description="下料人员")
     is_rivetweld: bool = Field(False, description="是否铆焊")
-    rivetweld_time: Optional[DateTimeStr] = Field(None, description="铆焊时间")
+    rivetweld_time: Optional[DateStr] = Field(None, description="铆焊时间")
     rivetweld_user: Optional[str] = Field(None, description="铆焊人员")
     is_machine: bool = Field(False, description="是否机加")
-    machine_time: Optional[DateTimeStr] = Field(None, description="机加时间")
+    machine_time: Optional[DateStr] = Field(None, description="机加时间")
     machine_user: Optional[str] = Field(None, description="机加人员")
     is_fitting: bool = Field(False, description="是否装配")
-    fitting_time: Optional[DateTimeStr] = Field(None, description="装配时间")
+    fitting_time: Optional[DateStr] = Field(None, description="装配时间")
     fitting_user: Optional[str] = Field(None, description="装配人员")
     is_painting: bool = Field(False, description="是否喷漆")
-    painting_time: Optional[DateTimeStr] = Field(None, description="喷漆时间")
+    painting_time: Optional[DateStr] = Field(None, description="喷漆时间")
     painting_user: Optional[str] = Field(None, description="喷漆人员")
 
 class OrdersCreate(OrderBaseModel):
