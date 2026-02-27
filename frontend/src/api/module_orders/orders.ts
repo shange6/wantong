@@ -18,13 +18,28 @@ export interface OrdersData {
   components_unit_mass: string;
   components_totle_mass: string;
   components_remark: string;
-  blanking_time?: Date;
-  rivetweld_time?: Date;
-  machine_time?: Date;
-  fitting_time?: Date;
-  painting_time?: Date;
-  created_time: Date;
-  updated_time: Date;
+  is_blanking: boolean;
+  blanking_time?: string;
+  blanking_user?: string;
+  blanking_laborhour?: number;
+  is_rivetweld: boolean;
+  rivetweld_time?: string;
+  rivetweld_user?: string;
+  rivetweld_laborhour?: number;
+  is_machine: boolean;
+  machine_time?: string;
+  machine_user?: string;
+  machine_laborhour?: number;
+  is_fitting: boolean;
+  fitting_time?: string;
+  fitting_user?: string;
+  fitting_laborhour?: number;
+  is_painting: boolean; 
+  painting_time?: string;
+  painting_user?: string;
+  painting_laborhour?: number;
+  created_time: string;
+  updated_time: string;
   [key: string]: any;
 }
 
@@ -34,10 +49,18 @@ export interface OrdersPageQuery extends OrdersFilter {
 }
 
 class OrdersAPI {
-  static getUnOrdersList(params: OrdersPageQuery) {
+  static getUnCreateList(params: OrdersPageQuery) {
     // return request<any, { data: { items: OrdersData[]; total: number } }>({
     return request({
-      url: `${MODULE_API_PREFIX}/unorderlist`,
+      url: `${MODULE_API_PREFIX}/uncreatelist`,
+      method: "get",
+      params,
+    });
+  }
+
+  static getUnLaborhourList(params: OrdersPageQuery) {
+    return request({
+      url: `${MODULE_API_PREFIX}/unlaborhourlist`,
       method: "get",
       params,
     });

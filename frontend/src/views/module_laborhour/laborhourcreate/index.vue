@@ -9,7 +9,7 @@
       @reset="handleFilterReset"
     />
     <!-- 数据表格 -->
-    <CreateOrderTable ref="tableRef" />
+    <CreateLaborHourTable ref="tableRef" />
     <!-- 分页 -->
   </div>
 </template>
@@ -17,7 +17,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import SearchForm from "@/views/module_projects/SearchForm.vue";
-import CreateOrderTable from "../../CreateOrderTable.vue";
+import CreateLaborHourTable from "../../module_orders/CreateLaborhourTable.vue";
 
 const tableRef = ref();
 

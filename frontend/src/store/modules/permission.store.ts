@@ -174,7 +174,9 @@ const transformRoutes = (routes: RouteVO[], isTopLevel: boolean = true): RouteRe
         normalizedRoute.component = Layout;
       } else {
         // 二级及以上的父路由，不使用Layout组件，只作为路由容器
-        normalizedRoute.component = undefined;
+        // normalizedRoute.component = undefined;
+        // 修改点：使用一个简单的匿名组件作为容器，确保能渲染子路由
+        normalizedRoute.component = { template: '<router-view />' }; 
       }
       // 递归处理子路由，标记为非顶级路由
       normalizedRoute.children = transformRoutes(route.children, false);

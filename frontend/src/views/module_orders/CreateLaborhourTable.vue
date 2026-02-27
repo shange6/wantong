@@ -1,6 +1,6 @@
 <template>
   <div v-loading="loading" class="create-order-table">
-    <ComponentsTable
+    <ListCreateLaborhourTable
       :data="filteredData"
       :current-page="pagination.currentPage"
       :page-size="pagination.pageSize"
@@ -19,14 +19,14 @@
               icon="plus"
               @click="handleOpenDialog(scope.row)"
             >
-              排产
+              工时
             </el-button>
           </template>
         </el-table-column>
       </template>
-    </ComponentsTable>
+    </ListCreateLaborhourTable>
 
-    <OrderDialog
+    <LaborhourDialog
       v-model="dialogVisible"
       :data="selectedRow"
       :title="dialogTitle"
@@ -37,12 +37,12 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from "vue";
-import ComponentsTable from "@/views/module_projects/ComponentsTable.vue";
-import OrderDialog from "./OrderDialog.vue";
+import ListCreateLaborhourTable from "@/views/module_orders/ListCreateLaborhourTable.vue";
+import LaborhourDialog from "./LaborhourDialog.vue";
 import OrdersAPI from "@/api/module_orders/orders";
 
 defineOptions({
-  name: "CreateOrderTable",
+  name: "CreateLaborhourTable",
   inheritAttrs: false,
 });
 
@@ -81,12 +81,12 @@ const handleQuery = async (params?: Record<string, any>) => {
       ...(props.queryParams || {}),
       ...(params || {}),
     };
-    const res = await OrdersAPI.getUnCreateList(query);
+    const res = await OrdersAPI.getUnLaborhourList(query);
     internalData.value = res.data?.data?.items || res.data?.items || [];
     filteredData.value = internalData.value; // 默认显示全量数据
     emit("load-data", internalData.value);
   } catch (error) {
-    console.error("获取待办工单列表失败:", error);
+    console.error("获取待填写工时列表失败:", error);
     internalData.value = [];
     filteredData.value = [];
   } finally {
@@ -107,7 +107,7 @@ defineExpose({
 });
 
 const dialogVisible = ref(false);
-const dialogTitle = ref("创建工单");
+const dialogTitle = ref("填写工时");
 const selectedRow = ref<any | null>(null);
 
 async function handleOpenDialog(row: any) {

@@ -1,8 +1,8 @@
-from sqlalchemy import select, func
+from sqlalchemy import select, func, or_, and_
 from sqlalchemy.orm import selectinload  # 已补充导入
 from .model import OrdersModel
 from app.plugin.module_projects.components.model import ComponentsModel
-from .schema import OrdersFilter, OrdersCreate, OrdersUpdate, OrdersOut
+from .schema import OrdersFilter, OrdersCreate, OrdersUpdate, OrdersOut, ComponentsUncreateOut
 from app.plugin.module_projects.components.schema import ComponentsOut
 from app.core.database import async_db_session
 from app.core.exceptions import CustomException
@@ -10,7 +10,7 @@ from datetime import datetime
 
 class OrdersService:
     @classmethod
-    async def get_unorders_list_service(cls, page_no: int, page_size: int, search: any):
+    async def get_uncreate_list_service(cls, page_no: int, page_size: int, search: any):
         """
         获取所有在组件表中存在，但尚未在订单表中创建记录的组件
         :param page_no: 页码
@@ -48,23 +48,73 @@ class OrdersService:
             result = await session.execute(stmt)
             items = result.scalars().all()
 
-            # 7. 格式化数据（对齐你代码中的数据结构）
-            data_list = []
-            for comp in items:
-                # 使用 ComponentsOut 进行序列化，自动处理时间格式
-                comp_dict = ComponentsOut.model_validate(comp).model_dump(mode='json')
-                
-                # 添加标记位（可选），前端可以根据此字段区分这是“待排产”组件
-                comp_dict["is_ordered"] = False
-                
-                data_list.append(comp_dict)
+            # 7. 格式化数据：利用 Pydantic 模型验证实现自动打平和前缀映射
+            data_list = [ComponentsUncreateOut.model_validate(comp).model_dump(mode='json') for comp in items]
 
             return {
                 "items": data_list,
                 "total": total,
                 "page_no": page_no,
                 "page_size": page_size
-            }   
+            }
+
+    @classmethod
+    async def get_unlaborhour_list_service(cls, page_no: int, page_size: int, search: any):
+        """
+        获取已创建工单但相应工序工时未填写的记录
+        逻辑：当is_xxx为真，但xxx_laborhour为空或0时筛选出来
+        :param page_no: 页码
+        :param page_size: 每页条数（0则返回全部）
+        :param search: 过滤条件
+        :return: 分页结果
+        """
+        async with async_db_session() as session:
+            # 1. 构建查询：OrdersModel 为主，关联 ComponentsModel 以便过滤项目和万通码
+            stmt = (
+                select(OrdersModel)
+                .options(selectinload(OrdersModel.component))
+                .join(ComponentsModel, OrdersModel.wtcode == ComponentsModel.wtcode)
+                .where(
+                    or_(
+                        and_(OrdersModel.is_blanking == True, or_(OrdersModel.blanking_laborhour == None, OrdersModel.blanking_laborhour == 0)),
+                        and_(OrdersModel.is_rivetweld == True, or_(OrdersModel.rivetweld_laborhour == None, OrdersModel.rivetweld_laborhour == 0)),
+                        and_(OrdersModel.is_machine == True, or_(OrdersModel.machine_laborhour == None, OrdersModel.machine_laborhour == 0)),
+                        and_(OrdersModel.is_fitting == True, or_(OrdersModel.fitting_laborhour == None, OrdersModel.fitting_laborhour == 0)),
+                        and_(OrdersModel.is_painting == True, or_(OrdersModel.painting_laborhour == None, OrdersModel.painting_laborhour == 0))
+                    )
+                )
+            )
+
+            # 2. 过滤条件扩展
+            if hasattr(search, 'project_code') and search.project_code:
+                stmt = stmt.where(ComponentsModel.project_code == search.project_code)
+            if hasattr(search, 'wtcode') and search.wtcode:
+                stmt = stmt.where(OrdersModel.wtcode.ilike(f"%{search.wtcode}%"))
+
+            # 3. 计算总条数
+            count_stmt = select(func.count()).select_from(stmt.subquery())
+            total = (await session.execute(count_stmt)).scalar() or 0
+
+            # 4. 排序（按万通码排序）
+            stmt = stmt.order_by(OrdersModel.wtcode.asc())
+
+            # 5. 分页处理
+            if page_size > 0:
+                stmt = stmt.offset((page_no - 1) * page_size).limit(page_size)
+
+            # 6. 执行查询
+            result = await session.execute(stmt)
+            items = result.scalars().all()
+
+            # 7. 格式化数据：利用 Pydantic 模型的 model_validator 实现自动打平映射
+            data_list = [OrdersOut.model_validate(order).model_dump(mode='json') for order in items]
+
+            return {
+                "items": data_list,
+                "total": total,
+                "page_no": page_no,
+                "page_size": page_size
+            }
 
     @classmethod
     async def get_orders_list_service(cls, page_no: int, page_size: int, search: OrdersFilter):
@@ -98,30 +148,9 @@ class OrdersService:
             
             # 执行查询
             result = await session.execute(stmt)
+            # 格式化数据
             items = result.scalars().all()
-            
-            # 格式化数据：关联组件字段
-            data_list = []
-            for order in items:
-                # 使用 Pydantic 的 model_dump(mode='json') 自动调用 DateTimeStr 的 PlainSerializer
-                # 这将处理时间字段的格式化（转为YYYY-MM-DD HH:mm:ss）
-                order_dict = OrdersOut.model_validate(order).model_dump(mode='json')
-                
-                # 关联组件数据（兼容组件为空的情况）
-                component_data = order.component or ComponentsModel()
-                component_dict = {
-                    "components_code": component_data.code or "",
-                    "components_spec": component_data.spec or "",
-                    "components_count": component_data.count or 0,
-                    "components_material": component_data.material or "",
-                    "components_unit_mass": component_data.unit_mass or 0.0,
-                    "components_totle_mass": component_data.total_mass or 0.0,
-                    "components_remark": component_data.remark or "",
-                }
-                
-                # 合并订单+组件数据
-                order_dict.update(component_dict)
-                data_list.append(order_dict)
+            data_list = [OrdersOut.model_validate(order).model_dump(mode='json') for order in items]
             
             return {
                 "items": data_list,

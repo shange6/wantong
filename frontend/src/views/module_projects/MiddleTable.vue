@@ -66,6 +66,8 @@ defineOptions({
   inheritAttrs: false,
 });
 
+const attrs = useAttrs();
+
 // 前端分页切片逻辑
 const displayData = computed(() => {
   const data = fullData.value;
@@ -97,7 +99,6 @@ const formatWtCode = (wtcode?: string): string => {
   return dotIndex !== -1 ? wtcode.substring(dotIndex + 1) : wtcode;
 };
 
-const attrs = useAttrs();
 // 2. 移除重复的 hook 调用，直接处理 attrs
 const filterOtherAttrs = computed(() => {
   const result = { ...attrs };

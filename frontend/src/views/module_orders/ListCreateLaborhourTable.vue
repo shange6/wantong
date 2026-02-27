@@ -14,64 +14,59 @@
         <el-table-column label="数量" prop="count" min-width="40" align="center" />        
         <el-table-column min-width="100" align="center">
           <template #header>
-            <div>下料时间</div>
-            <div>班长/工时</div>
+            <div>下料</div>
+            <div>时间</div>
           </template>
           <template #default="{ row }">
               <div>{{ row.blanking_time || '-' }}</div>
-              <div>{{ row.blanking_user || '-' }}</div>
-              <div>{{ row.blanking_laborhour || '-' }}</div>
+              <!-- <div>{{ row.blanking_user || '-' }}</div> -->
           </template>
         </el-table-column>
 
         <el-table-column min-width="100" align="center">
           <template #header>
-            <div>铆焊时间</div>
-            <div>班长/工时</div>
+            <div>铆焊</div>
+            <div>时间</div>
           </template>
           <template #default="{ row }">
               <div>{{ row.rivetweld_time || '-' }}</div>
-              <div>{{ row.rivetweld_user || '-' }}</div>
-              <div>{{ row.rivetweld_laborhour || '-' }}</div>
+              <!-- <div>{{ row.rivetweld_user || '-' }}</div> -->
           </template>
         </el-table-column>
 
         <el-table-column min-width="100" align="center">
           <template #header>
-            <div>加工时间</div>
-            <div>班长/工时</div>
+            <div>加工</div>
+            <div>时间</div>
           </template>
           <template #default="{ row }">
               <div>{{ row.machine_time || '-' }}</div>
-              <div>{{ row.machine_user || '-' }}</div> 
-              <div>{{ row.machine_laborhour || '-' }}</div>
+              <!-- <div>{{ row.machine_user || '-' }}</div> -->
           </template>
         </el-table-column>
 
         <el-table-column min-width="100" align="center">
           <template #header>
-            <div>装配时间</div>
-            <div>班长/工时</div>
+            <div>装配</div>
+            <div>时间</div>
           </template>          
           <template #default="{ row }">
               <div>{{ row.fitting_time || '-' }}</div>
-              <div>{{ row.fitting_user || '-' }}</div> 
-              <div>{{ row.fitting_laborhour || '-' }}</div>
+              <!-- <div>{{ row.fitting_user || '-' }}</div> -->
           </template>
         </el-table-column>
 
         <el-table-column min-width="100" align="center">
           <template #header>
-            <div>喷漆时间</div>
-            <div>班长/工时</div>
+            <div>喷漆</div>
+            <div>时间</div>
           </template>
           <template #default="{ row }">
               <div>{{ row.painting_time || '-' }}</div>
-              <div>{{ row.painting_user || '-' }}</div>
-              <div>{{ row.painting_laborhour || '-' }}</div>
+              <!-- <div>{{ row.painting_user || '-' }}</div> -->
           </template>
         </el-table-column>
-        <el-table-column label="备注" prop="remark" min-width="100" show-overflow-tooltip />
+        <el-table-column label="备注" prop="components_remark" min-width="100" show-overflow-tooltip />
         <slot name="operation-column"></slot>
       </template>
     </MiddleTable>

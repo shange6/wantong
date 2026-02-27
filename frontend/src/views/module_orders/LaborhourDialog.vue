@@ -5,7 +5,6 @@
     width="720px"
     @close="handleClose"
   >
-
     <ComponentsInfoDialog :data="data" />
     <hr />
     <hr />
@@ -31,21 +30,15 @@
           </el-form-item>
         </el-col>
         <el-col :span="9">
-          <el-form-item label="下料人员">
-            <el-select
-              v-model="formData.blanking_user"
+          <el-form-item label="下料工时">
+            <el-input-number
+              v-model="formData.blanking_laborhour"
               :disabled="!formData.is_blanking"
-              placeholder="选择下料人员"
-              filterable
-              clearable
-            >
-              <el-option
-                v-for="item in roleUserOptions.blanking"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              />
-            </el-select>
+              placeholder="输入工时"
+              :min="0"
+              :precision="0"
+              class="w-full"
+            />
           </el-form-item>
         </el-col>
 
@@ -69,21 +62,15 @@
           </el-form-item>
         </el-col>
         <el-col :span="9">
-          <el-form-item label="铆焊人员">
-            <el-select
-              v-model="formData.rivetweld_user"
+          <el-form-item label="铆焊工时">
+            <el-input-number
+              v-model="formData.rivetweld_laborhour"
               :disabled="!formData.is_rivetweld"
-              placeholder="选择铆焊人员"
-              filterable
-              clearable
-            >
-              <el-option
-                v-for="item in roleUserOptions.rivetweld"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              />
-            </el-select>
+              placeholder="输入工时"
+              :min="0"
+              :precision="0"
+              class="w-full"
+            />
           </el-form-item>
         </el-col>
 
@@ -107,21 +94,15 @@
           </el-form-item>
         </el-col>
         <el-col :span="9">
-          <el-form-item label="机加人员">
-            <el-select
-              v-model="formData.machine_user"
+          <el-form-item label="机加工时">
+            <el-input-number
+              v-model="formData.machine_laborhour"
               :disabled="!formData.is_machine"
-              placeholder="选择机加人员"
-              filterable
-              clearable
-            >
-              <el-option
-                v-for="item in roleUserOptions.machine"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              />
-            </el-select>
+              placeholder="输入工时"
+              :min="0"
+              :precision="0"
+              class="w-full"
+            />
           </el-form-item>
         </el-col>
 
@@ -145,21 +126,15 @@
           </el-form-item>
         </el-col>
         <el-col :span="9">
-          <el-form-item label="装配人员">
-            <el-select
-              v-model="formData.fitting_user"
+          <el-form-item label="装配工时">
+            <el-input-number
+              v-model="formData.fitting_laborhour"
               :disabled="!formData.is_fitting"
-              placeholder="选择装配人员"
-              filterable
-              clearable
-            >
-              <el-option
-                v-for="item in roleUserOptions.fitting"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              />
-            </el-select>
+              placeholder="输入工时"
+              :min="0"
+              :precision="0"
+              class="w-full"
+            />
           </el-form-item>
         </el-col>
 
@@ -183,21 +158,15 @@
           </el-form-item>
         </el-col>
         <el-col :span="9">
-          <el-form-item label="喷漆人员">
-            <el-select
-              v-model="formData.painting_user"
+          <el-form-item label="喷漆工时">
+            <el-input-number
+              v-model="formData.painting_laborhour"
               :disabled="!formData.is_painting"
-              placeholder="选择喷漆人员"
-              filterable
-              clearable
-            >
-              <el-option
-                v-for="item in roleUserOptions.painting"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              />
-            </el-select>
+              placeholder="输入工时"
+              :min="0"
+              :precision="0"
+              class="w-full"
+            />
           </el-form-item>
         </el-col>
       </el-row>
@@ -216,7 +185,6 @@
 import { ref, watch } from "vue";
 import ComponentsInfoDialog from "./ComponentsInfoDialog.vue";
 import OrdersAPI from "@/api/module_orders/orders";
-import RoleAPI from "@/api/module_system/role";
 import { ElMessage } from "element-plus";
 
 const props = defineProps<{
@@ -231,40 +199,27 @@ const emit = defineEmits<{
 }>();
 
 const visible = ref(false);
-const dialogTitle = ref("创建工单");
+const dialogTitle = ref("填写工时");
 const formRef = ref();
 const submitLoading = ref(false);
-
-const roleUserOptions = ref<Record<string, any[]>>({
-  blanking: [],
-  rivetweld: [],
-  machine: [],
-  fitting: [],
-  painting: [],
-});
 
 const initialFormData = {
   wtcode: "",
   is_blanking: false,
   blanking_time: "",
-  blanking_user: "",
-  blanking_labourhour: "",
+  blanking_laborhour: 0,
   is_rivetweld: false,
   rivetweld_time: "",
-  rivetweld_user: "",
-  rivetweld_labourhour: "",
+  rivetweld_laborhour: 0,
   is_machine: false,
   machine_time: "",
-  machine_user: "",
-  machine_labourhour: "",
+  machine_laborhour: 0,
   is_fitting: false,
   fitting_time: "",
-  fitting_user: "",
-  fitting_labourhour: "",
+  fitting_laborhour: 0,
   is_painting: false,
   painting_time: "",
-  painting_user: "",
-  painting_labourhour: "",
+  painting_laborhour: 0,
 };
 
 const formData = ref({ ...initialFormData });
@@ -280,8 +235,7 @@ watch(
         wtcode: props.data.wtcode,
         ...props.data 
       };
-      dialogTitle.value = props.title || (props.data.id ? "编辑工单" : "创建工单");
-      loadRoleUsers();
+      dialogTitle.value = props.title || (props.data.id ? "编辑工时" : "填写工时");
     }
   }
 );
@@ -292,29 +246,6 @@ watch(
     emit("update:modelValue", val);
   }
 );
-
-async function loadRoleUsers() {
-  const roleNameMap: Record<string, string> = {
-    blanking: "下料班长",
-    rivetweld: "铆焊班长",
-    machine: "机加班长",
-    fitting: "装配班长",
-    painting: "喷漆班长",
-  };
-  await Promise.all(
-    Object.entries(roleNameMap).map(async ([key, roleName]) => {
-      if (roleUserOptions.value[key]?.length) {
-        return;
-      }
-      const res = await RoleAPI.listRoleUsers({ role_name: roleName });
-      const list = res.data?.data || res.data || [];
-      roleUserOptions.value[key] = list.map((item: { name: string }) => ({
-        label: item.name,
-        value: item.name,
-      }));
-    })
-  );
-}
 
 function handleClose() {
   visible.value = false;
@@ -328,7 +259,11 @@ async function handleSubmit() {
   }
   submitLoading.value = true;
   try {
-    await OrdersAPI.create(formData.value);
+    if (props.data?.id) {
+      await OrdersAPI.update(props.data.id, formData.value);
+    } else {
+      await OrdersAPI.create(formData.value);
+    }
     ElMessage.success("保存成功");
     emit("success");
     handleClose();

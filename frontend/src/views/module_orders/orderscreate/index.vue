@@ -2,15 +2,14 @@
   <div class="app-container">
     <!-- 搜索表单 -->
     <SearchForm
-      v-model="queryParams"
+      v-model="queryFormData"
       :source-data="tableRef?.internalData || []"
       :show-no="false"
-      :show-material="false"
       @update="handleFilterUpdate"
       @reset="handleFilterReset"
     />
     <!-- 数据表格 -->
-    <ListOrderTable ref="tableRef" />
+    <CreateOrderTable ref="tableRef" />
     <!-- 分页 -->
   </div>
 </template>
@@ -18,23 +17,30 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import SearchForm from "@/views/module_projects/SearchForm.vue";
-import ListOrderTable from "../../ListOrderTable.vue";
-
-const queryParams = ref({
-  code: "",
-  spec: "",
-  material: "",
-});
+import CreateOrderTable from "@/views/module_orders/CreateOrderTable.vue";
 
 const tableRef = ref();
 
-const handleFilterUpdate = (data: any[]) => {
-  tableRef.value?.handleFilterUpdate(data);
-};
+// 查询参数
+const queryFormData = ref({
+  code: undefined,
+  spec: undefined,
+  material: undefined,
+});
 
-const handleFilterReset = () => {
+/**
+ * 响应 SearchForm 的前端过滤结果
+ */
+function handleFilterUpdate(filtered: any[]) {
+  tableRef.value?.handleFilterUpdate(filtered);
+}
+
+/**
+ * 重置查询：恢复全量显示
+ */
+function handleFilterReset() {
   tableRef.value?.handleFilterUpdate(tableRef.value?.internalData || []);
-};
+}
 </script>
 
 <style scoped></style>

@@ -7,8 +7,8 @@
       :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
       :current-page="pagination.currentPage"
       :page-size="pagination.pageSize"
-      @update:current-page="(val) => (pagination.currentPage = val)"
-      @update:page-size="(val) => (pagination.pageSize = val)"
+      @update:current-page="(val: number) => (pagination.currentPage = val)"
+      @update:page-size="(val: number) => (pagination.pageSize = val)"
     >
       <template #append-columns="{ formatWtCode }">
         <el-table-column type="selection" fixed min-width="20" align="center" />
