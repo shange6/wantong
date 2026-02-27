@@ -1,5 +1,5 @@
 # app/plugin/module_orders/schema.py
-from pydantic import BaseModel, Field, model_validator, ConfigDict
+from pydantic import BaseModel, Field, model_validator, ConfigDict, field_validator
 from datetime import datetime
 from typing import Optional, List, Any
 from app.core.validator import DateTimeStr, DateStr
@@ -31,6 +31,22 @@ class OrderBaseModel(BaseModel):
     painting_time: Optional[DateStr] = Field(None, description="喷漆时间")
     painting_user: Optional[str] = Field(None, description="喷漆班长")
     painting_laborhour: Optional[int] = Field(None, description="喷漆工时")
+
+    # 添加一个通用的预处理校验器
+    @field_validator(
+        "blanking_time", "blanking_user", 
+        "rivetweld_time", "rivetweld_user", 
+        "machine_time", "machine_user", 
+        "fitting_time", "fitting_user", 
+        "painting_time", "painting_user", 
+        mode="before"
+    )
+    @classmethod
+    def empty_string_to_none(cls, v):
+        # 如果输入是空字符串，强制转换为 None
+        if v == "":
+            return None
+        return v
 
 class OrdersCreate(OrderBaseModel):
     """订单创建模型"""

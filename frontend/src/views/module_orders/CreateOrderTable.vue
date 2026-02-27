@@ -12,7 +12,7 @@
         <el-table-column fixed="right" label="操作" align="center" min-width="60">
           <template #default="scope">
             <el-button
-              v-hasPerm="['module_orders:order:create']"
+              v-hasPerm="['module_orders:create']"
               type="primary"
               size="small"
               link

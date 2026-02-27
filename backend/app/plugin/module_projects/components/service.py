@@ -29,7 +29,8 @@ class ComponentsService:
             if page_size > 0:
                 stmt = stmt.offset((page_no - 1) * page_size).limit(page_size)
             
-            stmt = stmt.order_by(ComponentsModel.created_time.desc())
+            # 增加排序，按照 code 排序
+            stmt = stmt.order_by(ComponentsModel.code.asc())
             
             result = await session.execute(stmt)
             items = result.scalars().all()

@@ -15,7 +15,7 @@ OrdersRouter = APIRouter(route_class=OperationLogRoute, prefix="/order", tags=["
 async def get_uncreate_list(
     page: Annotated[PaginationQueryParam, Depends()],
     search: Annotated[OrdersFilter, Depends()],
-    auth: Annotated[AuthSchema, Depends(AuthPermission(["module_orders:order:query"]))]
+    auth: Annotated[AuthSchema, Depends(AuthPermission(["module_orders:create"]))]
 ):
     data = await OrdersService.get_uncreate_list_service(
         page_no=page.page_no,
@@ -28,7 +28,7 @@ async def get_uncreate_list(
 async def get_unlaborhour_list(
     page: Annotated[PaginationQueryParam, Depends()],
     search: Annotated[OrdersFilter, Depends()],
-    auth: Annotated[AuthSchema, Depends(AuthPermission(["module_orders:order:query"]))]
+    auth: Annotated[AuthSchema, Depends(AuthPermission(["module_laborhour:create"]))]
 ):
     data = await OrdersService.get_unlaborhour_list_service(
         page_no=page.page_no,
@@ -41,7 +41,7 @@ async def get_unlaborhour_list(
 async def get_orders_list(
     page: Annotated[PaginationQueryParam, Depends()],
     search: Annotated[OrdersFilter, Depends()],
-    auth: Annotated[AuthSchema, Depends(AuthPermission(["module_orders:order:query"]))]
+    auth: Annotated[AuthSchema, Depends(AuthPermission(["module_orders:query"]))]
 ):
     data = await OrdersService.get_orders_list_service(
         page_no=page.page_no,
@@ -53,7 +53,7 @@ async def get_orders_list(
 @OrdersRouter.post("/create", summary="创建工单", response_model=OrdersCreateOut)
 async def create_orders(
     obj: OrdersCreate,
-    auth: Annotated[AuthSchema, Depends(AuthPermission(["module_orders:order:create"]))]
+    auth: Annotated[AuthSchema, Depends(AuthPermission(["module_orders:create"]))]
 ):
     data = await OrdersService.create_orders_service(obj)
     return SuccessResponse(data=jsonable_encoder(data))
@@ -62,7 +62,7 @@ async def create_orders(
 async def update_orders(
     id: int, 
     obj: OrdersUpdate,
-    auth: Annotated[AuthSchema, Depends(AuthPermission(["module_orders:order:update"]))]
+    auth: Annotated[AuthSchema, Depends(AuthPermission(["module_orders:update"]))]
 ):
     data = await OrdersService.update_orders_service(id, obj)       
     return SuccessResponse(data=jsonable_encoder(OrdersOut.model_validate(data)))
@@ -70,7 +70,7 @@ async def update_orders(
 @OrdersRouter.delete("/delete", summary="删除工单")
 async def delete_orders(
     ids: list[int],
-    auth: Annotated[AuthSchema, Depends(AuthPermission(["module_orders:order:delete"]))] 
+    auth: Annotated[AuthSchema, Depends(AuthPermission(["module_orders:delete"]))] 
 ):
     await OrdersService.delete_orders_service(ids)
     return SuccessResponse(msg="删除成功")

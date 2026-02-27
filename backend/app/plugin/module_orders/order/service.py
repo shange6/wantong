@@ -183,8 +183,13 @@ class OrdersService:
                 # 创建订单
                 order = OrdersModel(**data.model_dump(exclude_unset=True))
                 session.add(order)
+                await session.flush() # 确保拿到 ID
+
+                # 重新查询以预加载关联组件，防止 DetachedInstanceError
+                final_stmt = select(OrdersModel).options(selectinload(OrdersModel.component)).where(OrdersModel.id == order.id)
+                final_order = (await session.execute(final_stmt)).scalars().first()
             
-            return order
+            return final_order
 
     @classmethod
     async def update_orders_service(cls, id: int, data: OrdersUpdate):
@@ -196,8 +201,8 @@ class OrdersService:
         """
         async with async_db_session() as session:
             async with session.begin():
-                # 查询订单是否存在
-                stmt = select(OrdersModel).where(OrdersModel.id == id)
+                # 查询订单是否存在，并预加载关联组件
+                stmt = select(OrdersModel).options(selectinload(OrdersModel.component)).where(OrdersModel.id == id)
                 order = (await session.execute(stmt)).scalars().first()
                 if not order:
                     raise CustomException(msg="订单不存在")
@@ -217,6 +222,14 @@ class OrdersService:
                 # 更新字段
                 for key, value in data.model_dump(exclude_unset=True).items():
                     setattr(order, key, value)
+                
+                # 若修改了万通码，需要重新加载 component 关系
+                if data.wtcode and data.wtcode != order.wtcode:
+                    # 刷新以同步 wtcode 变更到 component 关系
+                    await session.flush()
+                    # 重新查询以确保 component 关系被更新
+                    final_stmt = select(OrdersModel).options(selectinload(OrdersModel.component)).where(OrdersModel.id == id)
+                    order = (await session.execute(final_stmt)).scalars().first()
             
             return order
 
