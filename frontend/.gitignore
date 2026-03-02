@@ -4,6 +4,8 @@ dist
 dist-ssr
 *.local
 .history
+.dwg
+.dxf
 
 # Editor directories and files
 .idea

@@ -16,7 +16,7 @@
           📂 项目
         </el-button>
         <el-button v-hasPerm="['module_projects:parts:query']" type="warning" @click="toggleTable">
-          {{ partsTableVisible ? "切换组件" : "切换零件" }}
+          {{ partsTableVisible ? "切换组件" : "切换BOM" }}
         </el-button>
       </template>
     </SearchForm>

@@ -19,8 +19,7 @@
           </template>
           <template #default="{ row }">
               <div>{{ row.blanking_time || '-' }}</div>
-              <div>{{ row.blanking_user || '-' }}</div>
-              <div>{{ row.blanking_laborhour || '-' }}</div>
+              <div>{{ row.blanking_user || '-' }} - {{ row.blanking_laborhour || '-' }}</div>
           </template>
         </el-table-column>
 
@@ -31,8 +30,7 @@
           </template>
           <template #default="{ row }">
               <div>{{ row.rivetweld_time || '-' }}</div>
-              <div>{{ row.rivetweld_user || '-' }}</div>
-              <div>{{ row.rivetweld_laborhour || '-' }}</div>
+              <div>{{ row.rivetweld_user || '-' }} - {{ row.rivetweld_laborhour || '-' }}</div>
           </template>
         </el-table-column>
 
@@ -43,8 +41,7 @@
           </template>
           <template #default="{ row }">
               <div>{{ row.machine_time || '-' }}</div>
-              <div>{{ row.machine_user || '-' }}</div> 
-              <div>{{ row.machine_laborhour || '-' }}</div>
+              <div>{{ row.machine_user || '-' }} - {{ row.machine_laborhour || '-' }}</div>
           </template>
         </el-table-column>
 
@@ -55,8 +52,7 @@
           </template>          
           <template #default="{ row }">
               <div>{{ row.fitting_time || '-' }}</div>
-              <div>{{ row.fitting_user || '-' }}</div> 
-              <div>{{ row.fitting_laborhour || '-' }}</div>
+              <div>{{ row.fitting_user || '-' }} - {{ row.fitting_laborhour || '-' }}</div>
           </template>
         </el-table-column>
 
@@ -67,8 +63,7 @@
           </template>
           <template #default="{ row }">
               <div>{{ row.painting_time || '-' }}</div>
-              <div>{{ row.painting_user || '-' }}</div>
-              <div>{{ row.painting_laborhour || '-' }}</div>
+              <div>{{ row.painting_user || '-' }} - {{ row.painting_laborhour || '-' }}</div>
           </template>
         </el-table-column>
         <el-table-column label="备注" prop="remark" min-width="100" show-overflow-tooltip />
